@@ -4,11 +4,10 @@
  * @Email:  CQoute@gmail.com
  * @Filename: honeycomb-menu.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-27T05:49:29+09:30
+ * @Last modified time: 2020-04-27T08:35:35+09:30
  * @License: GPL-3
  */
 
-// import '../3rd-party/lodash.js';
 const _ = require('lodash');
 
 import EventManager from './event-manager.js';
@@ -65,7 +64,7 @@ customElements.whenDefined('ha-card').then(() => {
         if( ! config || ! config.honeycomb )
             return;
 
-        // The foolowing listeners wee defined by ActionHandler so to avoid duplicates we remove them
+        // Remove the following listeners that were defined by ActionHandler so to avoid duplicates
         this.removeEventListeners(['contextmenu', 'touchstart', 'touchend', 'touchcancel', 'mousedown', 'click', 'keyup']);
 
         // We need to set actionHandler false so bind on action-handler will process and assign eventListeners
@@ -112,7 +111,8 @@ class HoneycombMenu extends Polymer.Element
         return 'honeycomb-menu';
     }
 
-    static get properties() {
+    static get properties()
+    {
         return {
             hass: Object,
             config: Object,
@@ -138,7 +138,8 @@ class HoneycombMenu extends Polymer.Element
         }
     }
 
-    static get template() {
+    static get template()
+    {
         return Polymer.html`
             <style>
             @keyframes fadeIn { from {opacity: 0; } to { opacity: 1; } }
@@ -258,7 +259,7 @@ class HoneycombMenu extends Polymer.Element
             }
             </style>
             <div id="shade" class="shade" on-click="_handleShadeClick"></div>
-            <audio id="audio" src="/local/audio/pin-drop.ogg"></audio>
+            <audio id="audio"></audio>
             <template is="dom-if" if="{{config.xy_pad}}">
                 <xy-pad
                     style$="animation-delay: 500ms;"
@@ -425,11 +426,18 @@ class HoneycombMenu extends Polymer.Element
         if( ! e.detail.item )
             return;
 
-        if( e.detail.audio )
-            this.$.audio.play();
+        this._playButtonSound( e.detail.item );
 
         if( e.detail.autoclose )
             this.close(e.detail.item);
+    }
+
+    _playButtonSound( _item )
+    {
+        if( ! _item.config.audio )
+            return;
+        this.$.audio.src = _item.config.audio;
+        this.$.audio.play();
     }
 
     _handleXYPad(e)
@@ -487,6 +495,7 @@ class HoneycombMenu extends Polymer.Element
 
         return _.omit( _.merge( {}, this.config, item ), ['buttons', 'size', 'action', 'template_buttons', 'xy_pad', 'spacing'] );
     }
+
     _computeAnimateDelay( i )
     {
         return 125 * i + 'ms';

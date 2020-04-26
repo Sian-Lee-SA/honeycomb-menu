@@ -4,7 +4,7 @@
  * @Email:  CQoute@gmail.com
  * @Filename: comb.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-26T12:02:30+09:30
+ * @Last modified time: 2020-04-27T06:55:33+09:30
  * @License: GPL-3
  */
 
@@ -12,11 +12,13 @@ var cardTools = customElements.get('card-tools');
 
 class HoneycombMenuItem extends Polymer.Element
 {
-    static get is() {
+    static get is()
+    {
         return 'honeycomb-menu-item';
     }
 
-    static get properties() {
+    static get properties()
+    {
         return {
             hass: {
                 type: Object,
@@ -42,7 +44,8 @@ class HoneycombMenuItem extends Polymer.Element
         }
     }
 
-    static get template() {
+    static get template()
+    {
         return Polymer.html`
             <style>
             :host {
@@ -127,7 +130,7 @@ class HoneycombMenuItem extends Polymer.Element
         this.$.item.append( this._createLovelaceCard() );
     }
 
-    _createLovelaceCard(  )
+    _createLovelaceCard()
     {
         var card = cardTools.createCard(_.merge({}, {
             type: 'custom:button-card',
