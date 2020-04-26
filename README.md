@@ -8,11 +8,14 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 
 > This is still in alpha stages and has only be used and tested in chrome. Please expect errors and bugs otherwise you will be overly frustrated & disappointed!
 
+![Example of Honeycomb](examples/example-1.gif)
+![Example of XYPad](examples/example-xypad.gif)
+
 ## Requirements
 1. Card Tools
 
 ## How to install
-1. Download the [module]()
+1. Download the [module]('https://github.com/Sian-Lee-SA/honeycomb-menu/releases')
 1. Place the file into the `config/www` (you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path)
 1. Add the resource to the lovelace config. _There are two ways in doing this_
   1. `yaml` - find your lovelace.yaml then place the following into resources eg.
@@ -78,6 +81,8 @@ show_name | `true \| false` | `false` | Only relevant for cards that support thi
 The x and y properties have the same options. If one of the x or y properties are omitted then the pad will only go the direction that's defined.
 
 The pad can be useful for things like light brightness, color hue rotation, opening and closing shutters or roller doors etc.
+
+![Example of XYPad](examples/example-xypad.gif)
 
 Option          | Values        | Default   | Details
 --              | -             | -         | -
