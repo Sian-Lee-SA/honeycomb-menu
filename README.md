@@ -15,7 +15,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 1. Card Tools
 
 ## How to install
-1. Download the [module]('https://github.com/Sian-Lee-SA/honeycomb-menu/releases')
+1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
 1. Place the file into the `config/www` (you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path)
 1. Add the resource to the lovelace config. _There are two ways in doing this_
   1. `yaml` - find your lovelace.yaml then place the following into resources eg.
