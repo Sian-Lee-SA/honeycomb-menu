@@ -12,24 +12,26 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 ![Example of XYPad](examples/example-xypad.gif)
 
 ## Requirements
-1. Card Tools
+1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
 
 ## How to install
 1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
-1. Place the file into the `config/www` (you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path)
+1. Place the file into the `config/www` path of your home assistant installation
+    > (you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path)
+
 1. Add the resource to the lovelace config. _There are two ways in doing this_
-      1. `yaml` - find your lovelace.yaml then place the following into resources eg.
-            ```yaml
-                resources:
-                  - url: /local/{path-to-module}.js
-                    type: module
-            ```
-      1. `Web Interface` - (Home Assistant V0.108+):
-            1. Goto the configuration page then open `Lovelace Dashboards`
-            1. Select the `Resources` tab
-            1. Click on the `+` (add) button in the lower right
-            1. In the url field, add the module js file path ( Where your Home Assistant config/www/ path is needs to be replaced with /local/).  So a path to a saved file in `homeassistant_path/config/wwww/module.js` would be `/local/module.js` as the url path
-            1. Ensure Resource type is left as Javascript Module
+  1. `yaml` - find your lovelace.yaml then place the following into resources eg.
+        ```yaml
+            resources:
+              - url: /local/{path-to-module}.js
+                type: module
+        ```
+  1. `Web Interface` - (Home Assistant V0.108+):
+    1. Goto the configuration page then open `Lovelace Dashboards`
+    1. Select the `Resources` tab
+    1. Click on the `+` (add) button in the lower right
+    1. In the url field, add the module js file path ( Where your Home Assistant config/www/ path is needs to be replaced with /local/).  So a path to a saved file in `homeassistant_path/config/wwww/module.js` would be `/local/module.js` as the url path
+    1. Ensure Resource type is left as Javascript Module
 
 ## How to use
 when you define a card into your layout, you can just add honeycomb to the card config
