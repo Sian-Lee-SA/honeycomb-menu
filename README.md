@@ -17,7 +17,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 ## How to install
 1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
 1. Place the file into the `config/www` path of your home assistant installation
-    > (you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path)
+    > you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path
 
 1. Add the resource to the lovelace config. _There are two ways in doing this_
     1. `yaml` - find your lovelace.yaml then place the following into resources eg.
@@ -59,7 +59,7 @@ template_buttons | `list[0-5]`: [Button](#button-options) `\| break` | `null` | 
 buttons | `list[0-5]`: [Button](#button-options) `\| skip \| break` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
 active | `true \| false` | `false` | Setting this to true will apply active styles based on the entity it's assigned to
 autoclose | `true \| false` | `true` | Close the menu if a button is pressed
-audio | `true \| false` | `true` | Play button sound on tap
+audio | `any:url_path` | `null` | Point to a audio file that will play when a button has been tapped
 xy_pad | [XYPad](#xypad-options) | `null` | This will allow the adding of a xy pin in the middle of the honeycombs which can execute a service based on the x or y value
 size | `int:px` | `225` | The size in px of the honeycomb menu. Each button item grows with the size
 spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb item
@@ -71,12 +71,12 @@ Option          | Values        | Default   | Details
 type | `any:card` | `custom:button-card` | The base card to use for the button **Be sure to set the underlying card to 100% height or it may not display correctly**
 active | `true \| false` | `honeycomb:active` | Override the honeycomb active property for this button item
 autoclose | `true \| false` | `honeycomb:autoclose` | Override the honeycomb autoclose property for this button
-audio | `true \| false` | `honeycomb:audio` | Override the honeycomb audio property for this button
+audio | `any:url_path` | `honeycomb:audio` | Override the honeycomb audio property for this button
 entity | `any:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity.
 icon | `any:icon` | `null` | Only adding here for reference to custom:button-card so you can show an icon for the item
 color | `any:css_color` | var(--honeycomb-menu-icon-color) | Color of icon or background (depending on custom:button-card config). Leaving the default value allows the theme to handle the color
 show_name | `true \| false` | `false` | Only relevant for cards that support this option
- * Any other options for `Button:type` | - | - | -
+Any other options for `Button:type` | - | - | -
 
 ## `XYPad` Options
 
