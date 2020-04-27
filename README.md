@@ -8,8 +8,8 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 
 > This is still in alpha stages and has only be used and tested in chrome. Please expect errors and bugs otherwise you will be overly frustrated & disappointed!
 
-![Example of Honeycomb](examples/example-1.gif)
-![Example of XYPad](examples/example-xypad.gif)
+![Example of Honeycomb](https://github.com/Sian-Lee-SA/honeycomb-menu/raw/master/examples/example-1.gif)
+![Example of XYPad](https://github.com/Sian-Lee-SA/honeycomb-menu/raw/master/examples/example-xypad.gif)
 
 ## Requirements
 1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
@@ -53,13 +53,13 @@ when you define a card into your layout, you can just add honeycomb to the card 
 
 Option          | Values        | Default   | Details
 --              | -             |-          |-
-action          | `tap \| hold \| double_tap` | `hold` | Define the action that will activate the honeycomb menu (the action is bound to the card). It maybe wise to ensure this action doesn't bubble that will execute the cards default action; so for [custom:button-card](https://github.com/custom-cards/button-card) just make sure the options for that card doesn't conflict with same action that opens honeycomb unless you have unique reasons to do so.
-entity | `any:entity_id` | `card:entity` | This will call actions on the entity (entity_id) defined. If omitted then the card entity will be used.
-template_buttons | `list[0-5]`: [Button](#button-options) `\| break` | `null` | if using template or card options then this will allow the use of both card and template button configs. `break` will disable the honeycomb on the index.
-buttons | `list[0-5]`: [Button](#button-options) `\| skip \| break` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
-active | `true \| false` | `false` | Setting this to true will apply active styles based on the entity it's assigned to
-autoclose | `true \| false` | `true` | Close the menu if a button is pressed
-audio | `any:url_path` | `null` | Point to a audio file that will play when a button has been tapped
+action          | `'tap' \| 'hold' \| 'double_tap'` | `hold` | Define the action that will activate the honeycomb menu (the action is bound to the card). It maybe wise to ensure this action doesn't bubble that will execute the cards default action; so for [custom:button-card](https://github.com/custom-cards/button-card) just make sure the options for that card doesn't conflict with same action that opens honeycomb unless you have unique reasons to do so.
+entity | `str:entity_id` | `card:entity` | This will call actions on the entity (entity_id) defined. If omitted then the card entity will be used.
+template_buttons | _list[0-5]_: [Button](#button-options) `\| 'break'` | `null` | if using template or card options then this will allow the use of both card and template button configs. `break` will disable the honeycomb on the index.
+buttons | _list[0-5]_: [Button](#button-options) `\| 'skip' \| 'break'` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
+active | `boolean` | `false` | Setting this to true will apply active styles based on the entity it's assigned to
+autoclose | `boolean` | `true` | Close the menu if a button is pressed
+audio | `str:url_path` | `null` | Point to a audio file that will play when a button has been tapped
 xy_pad | [XYPad](#xypad-options) | `null` | This will allow the adding of a xy pin in the middle of the honeycombs which can execute a service based on the x or y value
 size | `int:px` | `225` | The size in px of the honeycomb menu. Each button item grows with the size
 spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb item
@@ -69,13 +69,13 @@ spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb
 Option          | Values        | Default   | Details
 --              | -             | -         | -
 type | `any:card` | `custom:button-card` | The base card to use for the button **Be sure to set the underlying card to 100% height or it may not display correctly**
-active | `true \| false` | `honeycomb:active` | Override the honeycomb active property for this button item
-autoclose | `true \| false` | `honeycomb:autoclose` | Override the honeycomb autoclose property for this button
-audio | `any:url_path` | `honeycomb:audio` | Override the honeycomb audio property for this button
-entity | `any:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity.
-icon | `any:icon` | `null` | Only adding here for reference to custom:button-card so you can show an icon for the item
-color | `any:css_color` | var(--honeycomb-menu-icon-color) | Color of icon or background (depending on custom:button-card config). Leaving the default value allows the theme to handle the color
-show_name | `true \| false` | `false` | Only relevant for cards that support this option
+active | `boolean` | `honeycomb:active` | Override the honeycomb active property for this button item
+autoclose | `boolean` | `honeycomb:autoclose` | Override the honeycomb autoclose property for this button
+audio | `str:url_path` | `honeycomb:audio` | Override the honeycomb audio property for this button
+entity | `str:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity.
+icon | `str:icon` | `null` | Only adding here for reference to custom:button-card so you can show an icon for the item
+color | `str:css_color` | `var(--honeycomb-menu-icon-color)` | Color of icon or background (depending on custom:button-card config). Leaving the default value allows the theme to handle the color
+show_name | `boolean` | `false` | Only relevant for cards that support this option
 Any other options for `Button:type` | - | - | -
 
 ## `XYPad` Options
@@ -84,20 +84,20 @@ The x and y properties have the same options. If one of the x or y properties ar
 
 The pad can be useful for things like light brightness, color hue rotation, opening and closing shutters or roller doors etc.
 
-![Example of XYPad](examples/example-xypad.gif)
+![Example of XYPad](https://github.com/Sian-Lee-SA/honeycomb-menu/raw/master/examples/example-xypad.gif)
 
 Option          | Values        | Default   | Details
 --              | -             | -         | -
 repeat | `int:ms \| false` | `false` | If the xy pin is moved but idle, then repeat will continue calling the service otherwise the service will only be called when the xy pin is moving
-on_release | `true \| false` | `false` | Only call the service when the xy pin has been released while providing the x y value that it was on
+on_release | `boolean` | `false` | Only call the service when the xy pin has been released while providing the x y value that it was on
 x | [XYConfig](#xyconfig) | `null` | See below for properties and values. * `null` will disable x movements
 y | [XYConfig](#xyconfig) | `null` | See below for properties and values. * `null` will disable y movements
 
 #### XYConfig
 Option          | Values        | Default   | Details
 --              | -             | -         | -
-invert | `true \| false` | `false` | x or y will swap negative and positive values so moving xy pin up will give a positive value whereas down will give a negative value
-service | `any:service` | `null` | The service to call eg. light.turn_on. If this value is omitted then the ball pin will have no effect on this axis
+invert | `boolean` | `false` | x or y will swap negative and positive values so moving xy pin up will give a positive value whereas down will give a negative value
+service | `str:service` | `null` | The service to call eg. light.turn_on. If this value is omitted then the ball pin will have no effect on this axis
 service_data | `dict` | `null` | Provide any service data as a dictionary / object. This property will be processed through the template system allowing access to variables and javascript. See [Templating](#templating).
 
 ## Theme Styles and Defaults
