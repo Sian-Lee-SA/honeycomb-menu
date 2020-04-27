@@ -4,7 +4,7 @@
  * @Email:  CQoute@gmail.com
  * @Filename: honeycomb-menu.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-27T08:35:35+09:30
+ * @Last modified time: 2020-04-27T15:19:26+09:30
  * @License: GPL-3
  */
 
@@ -295,9 +295,12 @@ class HoneycombMenu extends Polymer.Element
         cardTools.provideHass(this);
 
         _.defaults(this.config, {
+            action: 'hold',
+            entity: this.base.entity,
+            active: false,
+            autoclose: true,
             size: 225,
-            spacing: 2,
-            entity: this.base.entity
+            spacing: 2
         });
 
         // These aren't perfect calculations but produces the result we want
