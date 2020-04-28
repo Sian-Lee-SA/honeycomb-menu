@@ -4,11 +4,9 @@
  * @Email:  CQoute@gmail.com
  * @Filename: comb.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-27T06:55:33+09:30
+ * @Last modified time: 2020-04-29T04:21:19+09:30
  * @License: GPL-3
  */
-
-var cardTools = customElements.get('card-tools');
 
 class HoneycombMenuItem extends Polymer.Element
 {

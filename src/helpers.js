@@ -4,9 +4,24 @@
  * @Email:  CQoute@gmail.com
  * @Filename: helpers.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-26T07:33:31+09:30
+ * @Last modified time: 2020-04-29T04:40:46+09:30
  * @License: GPL-3
  */
+
+export function fireEvent( _node, _event, _detail = {}, _options = {})
+{
+    const event = new Event( _event, Object.assign( {}, {
+        bubbles: true,
+        cancelable: false,
+        composed: true
+    }, _options) );
+
+    event.detail = _detail;
+
+    _node.dispatchEvent(event);
+
+    return event;
+}
 
 export function evalTemplate(hass, state, func)
 {

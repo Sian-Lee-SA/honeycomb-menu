@@ -110,7 +110,7 @@ styes {
     --honeycomb-menu-icon-active-color: var(--paper-item-icon-active-color);
     --honeycomb-menu-background-color: var(--paper-card-background-color);
     --honeycomb-menu-active-background-color: var(--paper-card-active-background-color, var(--paper-card-background-color));
-	--honeycomb-menu-disabled: #9a9a9a6e
+	--honeycomb-menu-disabled: #9a9a9a6e;
 }
 ```
 

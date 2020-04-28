@@ -4,7 +4,7 @@
  * @Email:  CQoute@gmail.com
  * @Filename: honeycomb-menu.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-27T15:19:26+09:30
+ * @Last modified time: 2020-04-29T04:43:12+09:30
  * @License: GPL-3
  */
 
@@ -13,7 +13,7 @@ const _ = require('lodash');
 import EventManager from './event-manager.js';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate } from "./helpers.js";
+import { objectEvalTemplate, fireEvent } from "./helpers.js";
 
 // Hook / Hack the HaCard to handle our needs and allow instantiating the hoeycomb
 customElements.whenDefined('ha-card').then(() => {
@@ -326,7 +326,7 @@ class HoneycombMenu extends Polymer.Element
         this._setCssVars();
     }
 
-    close( _item )
+    close( _item = null )
     {
         if( this.closing )
             return;
@@ -335,20 +335,14 @@ class HoneycombMenu extends Polymer.Element
 
         if( _item ) _item.setAttribute('selected', '');
 
-        var details = {
-            detail: {
-                item: _item || false
-            }
-        };
-
-        this.dispatchEvent( new CustomEvent('closing', details) );
+        fireEvent(this, 'closing', { item: _item });
         // Remove shade div earlier to allow clicking of other lovelace elements while the animation continues
         this.$.shade.addEventListener('animationend', function(e) {
             this.remove();
         });
         this.shadowRoot.querySelectorAll('honeycomb-menu-item')[5].addEventListener('animationend', e => {
             this.remove();
-            this.dispatchEvent( new CustomEvent('closed', details) );
+            fireEvent(this, 'closed', { item: _item });
         });
     }
 
