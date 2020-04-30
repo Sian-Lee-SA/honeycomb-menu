@@ -13,6 +13,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 
 ## Requirements
 1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
+1. [button-card](https://github.com/custom-cards/button-card)
 
 ## How to install
 1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
@@ -55,8 +56,8 @@ Option          | Values        | Default   | Details
 --              | -             |-          |-
 action          | `'tap' \| 'hold' \| 'double_tap'` | `hold` | Define the action that will activate the honeycomb menu (the action is bound to the card). It maybe wise to ensure this action doesn't bubble that will execute the cards default action; so for [custom:button-card](https://github.com/custom-cards/button-card) just make sure the options for that card doesn't conflict with same action that opens honeycomb unless you have unique reasons to do so.
 entity | `str:entity_id` | `card:entity` | This will call actions on the entity (entity_id) defined. If omitted then the card entity will be used.
-template_buttons | _list[0-5]_: [Button](#button-options) `\| 'break'` | `null` | if using template or card options then this will allow the use of both card and template button configs. `break` will disable the honeycomb on the index.
-buttons | _list[0-5]_: [Button](#button-options) `\| 'skip' \| 'break'` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
+template | `str:template_name` | `null` | If templated has been added to your lovelace config, then this options will merge with the menu. The higher up on the hierarchy takes precedence. For more info see [Inheritance](#inheritance).
+buttons | _list[0-5]_: [Button](#button-options) `\| 'skip' \| 'break'` | `null` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with inherited buttons will be overridden. Using the string `skip` on an inherited index will use the inherited button for that index. The string `break` will instead disable that honeycomb position regardless any inheritance.
 active | `boolean` | `false` | Setting this to true will apply active styles based on the entity it's assigned to
 autoclose | `boolean` | `true` | Close the menu if a button is pressed
 audio | `str:url_path` | `null` | Point to a audio file that will play when a button has been tapped
@@ -68,15 +69,16 @@ spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb
 
 Option          | Values        | Default   | Details
 --              | -             | -         | -
-type | `any:card` | `custom:button-card` | The base card to use for the button **Be sure to set the underlying card to 100% height or it may not display correctly**
 active | `boolean` | `honeycomb:active` | Override the honeycomb active property for this button item
 autoclose | `boolean` | `honeycomb:autoclose` | Override the honeycomb autoclose property for this button
 audio | `str:url_path` | `honeycomb:audio` | Override the honeycomb audio property for this button
 entity | `str:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity.
 icon | `str:icon` | `null` | Only adding here for reference to custom:button-card so you can show an icon for the item
-color | `str:css_color` | `var(--honeycomb-menu-icon-color)` | Color of icon or background (depending on custom:button-card config). Leaving the default value allows the theme to handle the color
+color | `str:css_color` | `var(--honeycomb-menu-icon-color)` | Color of icon. Leaving the default value allows the theme to handle the color
 show_name | `boolean` | `false` | Only relevant for cards that support this option
-Any other options for `Button:type` | - | - | -
+tap_action | [Action](https://github.com/custom-cards/button-card#action) | `null` | Assign the action to take if this button has been tapped
+hold_action | [Action](https://github.com/custom-cards/button-card#action) | `null` | Assign the action to take if this button has been held
+double_tap_action | [Action](https://github.com/custom-cards/button-card#action) | `null` | Assign the action to take if this button has been tapped twice quickly
 
 ## `XYPad` Options
 
@@ -100,6 +102,64 @@ invert | `boolean` | `false` | x or y will swap negative and positive values so 
 service | `str:service` | `null` | The service to call eg. light.turn_on. If this value is omitted then the ball pin will have no effect on this axis
 service_data | `dict` | `null` | Provide any service data as a dictionary / object. This property will be processed through the template system allowing access to variables and javascript. See [Templating](#templating).
 
+## Inheritance
+
+You may add templates for your honeycomb menu to inherit from. A template can also derive from another template and so on. Add `honeycomb_menu_templates` property to your lovelace config.
+
+Edit your lovelace yaml file
+```yaml
+title: Home Assistant
+honeycomb_menu_templates: !include ../honeycomb-menu-templates.yaml
+```
+To keep things neat and tidy, it's a good idea to include the templates from a separate file like shown above.
+
+Your templates can hold any value that `honeycomb:` accepts. The name of the template needs to be defined with the properties and values assigned to the template name. See below for an example of how to define a template and how the light template also inherits the base template.
+
+The example shows that both light and base have action assigned. The result will be action: hold because base in inherited which in turn gets overridden on matching values. `skip` and `break` are also valid buttons where skip will resort to it's inherited button value.
+```yaml
+base:
+  action: tap
+
+light:
+  template: base
+  action: hold
+  audio: /local/audio/pin-drop.ogg
+  xy_pad:
+    repeat: 500
+    y:
+      invert: true
+      service: light.relative_brightnesss
+      service_data:
+        entity_id: entity
+        brightness: '[[[ return {{ y_percentage }} / 10; ]]]'
+        percentage: true
+  buttons:
+    - icon: 'mdi:lightbulb'
+      active: true
+    - icon: 'mdi:information-variant'
+      tap_action:
+        action: more-info
+    - icon: 'mdi:page-next'
+      autoclose: false
+      tap_action:
+        action: call-service
+        service: light.cycle_light_profile
+        service_data:
+          entity_id: entity
+```
+
+Once your templates are done, you can simply inherit them by adding template with the value being your template name to your honeycomb config.
+
+```yaml
+type: custom:button-card
+entity: light.livingroom_main
+template: light
+honeycomb:
+    template: light
+```
+
+If using button card or something similar with a template system then you could add honeycomb to the cards template instead. Keep in mind that Custom Button Card assigns their template values. So if adding a honeycomb to a card that has a template, then the honeycomb will assign the values instead of merging and may give undesired results. This is a result of how the developer designs their cards.
+
 ## Theme Styles and Defaults
 
 Adding the following style properties to your theme `.yaml` file will override the defaults
@@ -110,7 +170,7 @@ styes {
     --honeycomb-menu-icon-active-color: var(--paper-item-icon-active-color);
     --honeycomb-menu-background-color: var(--paper-card-background-color);
     --honeycomb-menu-active-background-color: var(--paper-card-active-background-color, var(--paper-card-background-color));
-	--honeycomb-menu-disabled: #9a9a9a6e
+    --honeycomb-menu-disabled: #9a9a9a6e;
 }
 ```
 

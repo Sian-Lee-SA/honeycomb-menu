@@ -4,9 +4,11 @@
  * @Email:  CQoute@gmail.com
  * @Filename: xy_pad.js
  * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-24T06:34:31+09:30
+ * @Last modified time: 2020-04-29T04:50:53+09:30
  * @License: GPL-3
  */
+
+import { fireEvent } from "./helpers.js";
 
 class XYPad extends Polymer.Element
 {
@@ -120,11 +122,11 @@ class XYPad extends Polymer.Element
         this.active = true;
         this.style.zIndex = 100;
 
-        this.dispatchEvent( this.__constructEvent('drag-start') );
+        fireEvent(this, 'drag-start', this.__eventData());
 
         if( this.config.repeat )
             this._interval = setInterval(e => {
-                this.dispatchEvent( this.__constructEvent('drag-interval') );
+                fireEvent(this, 'drag-interval', this.__eventData());
             }, this.config.repeat);
     }
 
@@ -137,7 +139,7 @@ class XYPad extends Polymer.Element
 
         this.$.joystick.style.transform = `translate3d(${this._current.x}px, ${this._current.y}px, 0)`;
 
-        this.dispatchEvent( this.__constructEvent('drag') );
+        fireEvent(this, 'drag', this.__eventData());
     }
 
     _handleOnDrag(e)
@@ -159,26 +161,19 @@ class XYPad extends Polymer.Element
 
     _handleOnDragEnd(e)
     {
-        this.dispatchEvent( this.__constructEvent('drag-end') );
+        fireEvent(this, 'drag-end', this.__eventData());
         this._reset();
     }
 
-    __constructEvent( _name )
-    {
-        return new CustomEvent(_name, this.__constructEventData() );
-    }
-
-    __constructEventData()
+    __eventData()
     {
         let x = (this.config.x && this.config.x.invert) ? -(this._current.x) : this._current.x;
         let y = (this.config.y && this.config.y.invert) ? -(this._current.y) : this._current.y;
         return {
-            detail: {
-                x: x,
-                y: y,
-                x_percentage: x / this.clampX * 100,
-                y_percentage: y / this.clampY * 100
-            }
+            x: x,
+            y: y,
+            x_percentage: x / this.clampX * 100,
+            y_percentage: y / this.clampY * 100
         };
     }
 };
