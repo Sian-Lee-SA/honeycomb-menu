@@ -3,8 +3,8 @@
  * @Date:   2020-04-19T12:09:12+09:30
  * @Email:  CQoute@gmail.com
  * @Filename: honeycomb-menu.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-29T04:43:12+09:30
+ * @Last modified by:   Sian Croser <Sian-Lee-SA>
+ * @Last modified time: 2020-04-30T09:33:00+09:30
  * @License: GPL-3
  */
 
@@ -18,9 +18,8 @@ import { objectEvalTemplate, fireEvent } from "./helpers.js";
 // Hook / Hack the HaCard to handle our needs and allow instantiating the hoeycomb
 customElements.whenDefined('ha-card').then(() => {
     const HaCard = customElements.get('ha-card');
-    Object.assign( HaCard.prototype, EventManager.prototype );
 
-    const cardTools = customElements.get('card-tools');
+    Object.assign( HaCard.prototype, EventManager.prototype );
 
     _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
@@ -64,6 +63,37 @@ customElements.whenDefined('ha-card').then(() => {
         if( ! config || ! config.honeycomb )
             return;
 
+        function traverseConfigs( _config )
+        {
+            if( _.isString(_config) )
+                _config = cardTools.lovelace.config.honeycomb_menu_templates[_config];
+            // Allow non extensible to be a new object that can be extended. Using
+            // merge will also affect sub properties
+            _config = _.merge({}, _config );
+            // If there are no buttons then we want it defined for returned calculations
+            if( ! _config.buttons )
+                _config.buttons = new Array(6);
+
+            if( ! _config.template ||
+                ! cardTools.lovelace.config.honeycomb_menu_templates ||
+                ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
+            ) return _config;
+
+            let pConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template] );
+
+            for( let i = 0; i < 6; i++ )
+            {
+                if( ! _config.buttons[i] || _config.buttons[i] == 'skip' )
+                    _config.buttons[i] = pConfig.buttons[i];
+            }
+            return Object.assign({}, pConfig, _config );
+        }
+        
+        const honeycombConfig = traverseConfigs( config.honeycomb );
+        if( ! honeycombConfig.entity )
+            honeycombConfig.entity = config.entity;
+
+        // console.dir(honeycombConfig);
         // Remove the following listeners that were defined by ActionHandler so to avoid duplicates
         this.removeEventListeners(['contextmenu', 'touchstart', 'touchend', 'touchcancel', 'mousedown', 'click', 'keyup']);
 
@@ -73,14 +103,14 @@ customElements.whenDefined('ha-card').then(() => {
         // regardless of our config action
         document.body.querySelector("action-handler").bind(this, {
             hasHold: true,
-            hasDoubleClick: true,
+            hasDoubleClick: true
         });
 
         // Push our action listener to the top of the list so we can
         // see if our menu was trigger and to stop propagation if so...
         // If not, then the event will follow through to the other listeners
         this.prependEventListener('action', e => {
-            if( e.detail.action != config.honeycomb.action )
+            if( e.detail.action != honeycombConfig.action )
                 return;
 
             e.stopImmediatePropagation();
@@ -92,11 +122,8 @@ customElements.whenDefined('ha-card').then(() => {
             manager.honeycomb = document.createElement('honeycomb-menu');
             // Some configs can be non extensible so we make them
             // extensible
-            manager.honeycomb.config = Object.create( config.honeycomb );
-            manager.honeycomb.base = Object.create( config );
-
+            manager.honeycomb.config = honeycombConfig;
             manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
-
             manager.honeycomb.addEventListener('closing', e => {
                 manager.honeycomb = null;
             });
@@ -116,7 +143,6 @@ class HoneycombMenu extends Polymer.Element
         return {
             hass: Object,
             config: Object,
-            base: Object,
             sizes: {
                 type: Object,
                 readonly: true
@@ -296,7 +322,7 @@ class HoneycombMenu extends Polymer.Element
 
         _.defaults(this.config, {
             action: 'hold',
-            entity: this.base.entity,
+            entity: null,
             active: false,
             autoclose: true,
             size: 225,
@@ -353,10 +379,7 @@ class HoneycombMenu extends Polymer.Element
         {
             let button = {};
 
-            if( this.config.template_buttons && this.config.template_buttons[i] )
-                button = this.config.template_buttons[i];
-
-            if( this.config.buttons && this.config.buttons[i] && this.config.buttons[i] != 'skip' )
+            if( this.config.buttons && this.config.buttons[i] )
                 button = this.config.buttons[i];
 
             if( button == 'break' )
@@ -489,7 +512,6 @@ class HoneycombMenu extends Polymer.Element
     {
         if( _.isEmpty(item) )
             return item;
-
         return _.omit( _.merge( {}, this.config, item ), ['buttons', 'size', 'action', 'template_buttons', 'xy_pad', 'spacing'] );
     }
 

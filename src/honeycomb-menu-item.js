@@ -3,8 +3,8 @@
  * @Date:   2020-04-19T19:45:08+09:30
  * @Email:  CQoute@gmail.com
  * @Filename: comb.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-29T04:21:19+09:30
+ * @Last modified by:   Sian Croser <Sian-Lee-SA>
+ * @Last modified time: 2020-04-30T16:16:53+09:30
  * @License: GPL-3
  */
 
@@ -47,6 +47,7 @@ class HoneycombMenuItem extends Polymer.Element
         return Polymer.html`
             <style>
             :host {
+                --paper-item-icon-active-color: var(--paper-item-icon-color);
             }
             :host([active]) {
                 --paper-card-background-color: var(--paper-card-active-background-color);
@@ -122,19 +123,23 @@ class HoneycombMenuItem extends Polymer.Element
             active: false
         }, this.config);
 
-        if( ! this.config.active )
-            this.style.setProperty('--paper-item-icon-active-color', 'var(--paper-item-icon-color)');
-
-        this.$.item.append( this._createLovelaceCard() );
+        this.$.item.append( this._createItemCard() );
     }
 
-    _createLovelaceCard()
+    _createItemCard()
     {
-        var card = cardTools.createCard(_.merge({}, {
+        var card = cardTools.createCard({
             type: 'custom:button-card',
+            entity: this.config.entity,
             size: '30px',
-            show_name: false
-        }, this.config));
+            show_name: false,
+            icon: this.config.icon,
+            tap_action: this.config.tap_action,
+            hold_action: this.config.hold_action,
+            double_tap_action: this.config.double_tap_action,
+            confirmation: this.config.confirmation,
+            color: this.config.color
+        });
         cardTools.provideHass( card );
 
         card.addEventListener('action', e => {
@@ -143,7 +148,7 @@ class HoneycombMenuItem extends Polymer.Element
             e.detail.audio = this.config.audio;
         });
 
-        var sheet = new CSSStyleSheet
+        var sheet = new CSSStyleSheet;
         sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; }`);
         card.shadowRoot.adoptedStyleSheets = [ ...card.shadowRoot.adoptedStyleSheets, sheet ];
 
