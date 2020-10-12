@@ -3,8 +3,8 @@
  * @Date:   2020-04-19T12:09:12+09:30
  * @Email:  CQoute@gmail.com
  * @Filename: honeycomb-menu.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-27T08:35:35+09:30
+ * @Last modified by:   Sian Croser <Sian-Lee-SA>
+ * @Last modified time: 2020-05-11T20:06:04+09:30
  * @License: GPL-3
  */
 
@@ -13,14 +13,13 @@ const _ = require('lodash');
 import EventManager from './event-manager.js';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate } from "./helpers.js";
+import { objectEvalTemplate, fireEvent } from "./helpers.js";
 
 // Hook / Hack the HaCard to handle our needs and allow instantiating the hoeycomb
 customElements.whenDefined('ha-card').then(() => {
     const HaCard = customElements.get('ha-card');
-    Object.assign( HaCard.prototype, EventManager.prototype );
 
-    const cardTools = customElements.get('card-tools');
+    Object.assign( HaCard.prototype, EventManager.prototype );
 
     _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
@@ -59,13 +58,44 @@ customElements.whenDefined('ha-card').then(() => {
     HaCard.prototype.firstUpdated = function(changedProperties)
     {
         this._firstUpdated(changedProperties);
-
         const config = findConfig(this);
+
         if( ! config || ! config.honeycomb )
             return;
 
+        function traverseConfigs( _config )
+        {
+            if( _.isString(_config) )
+                _config = cardTools.lovelace.config.honeycomb_menu_templates[_config];
+            // Allow non extensible to be a new object that can be extended. Using
+            // merge will also affect sub properties
+            _config = _.merge({}, _config );
+            // If there are no buttons then we want it defined for returned calculations
+            if( ! _config.buttons )
+                _config.buttons = new Array(6);
+
+            if( ! _config.template ||
+                ! cardTools.lovelace.config.honeycomb_menu_templates ||
+                ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
+            ) return _config;
+
+            let pConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template] );
+
+            for( let i = 0; i < 6; i++ )
+            {
+                if( ! _config.buttons[i] || _config.buttons[i] == 'skip' )
+                    _config.buttons[i] = pConfig.buttons[i];
+            }
+            return Object.assign({}, pConfig, _config );
+        }
+
+        const honeycombConfig = traverseConfigs( config.honeycomb );
+        if( ! honeycombConfig.entity )
+            honeycombConfig.entity = config.entity;
+
+        // console.dir(honeycombConfig);
         // Remove the following listeners that were defined by ActionHandler so to avoid duplicates
-        this.removeEventListeners(['contextmenu', 'touchstart', 'touchend', 'touchcancel', 'mousedown', 'click', 'keyup']);
+        // this.removeEventListeners(['contextmenu', 'touchstart', 'touchend', 'touchcancel', 'click', 'keyup']);
 
         // We need to set actionHandler false so bind on action-handler will process and assign eventListeners
         this.actionHandler = false;
@@ -73,14 +103,14 @@ customElements.whenDefined('ha-card').then(() => {
         // regardless of our config action
         document.body.querySelector("action-handler").bind(this, {
             hasHold: true,
-            hasDoubleClick: true,
+            hasDoubleClick: true
         });
 
         // Push our action listener to the top of the list so we can
         // see if our menu was trigger and to stop propagation if so...
         // If not, then the event will follow through to the other listeners
         this.prependEventListener('action', e => {
-            if( e.detail.action != config.honeycomb.action )
+            if( e.detail.action != honeycombConfig.action || manager.honeycomb != null )
                 return;
 
             e.stopImmediatePropagation();
@@ -92,15 +122,12 @@ customElements.whenDefined('ha-card').then(() => {
             manager.honeycomb = document.createElement('honeycomb-menu');
             // Some configs can be non extensible so we make them
             // extensible
-            manager.honeycomb.config = Object.create( config.honeycomb );
-            manager.honeycomb.base = Object.create( config );
-
+            manager.honeycomb.config = honeycombConfig;
             manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
-
             manager.honeycomb.addEventListener('closing', e => {
                 manager.honeycomb = null;
             });
-        });
+        }, { useCapture: false, passive: false, once: false });
     }
 });
 
@@ -116,7 +143,6 @@ class HoneycombMenu extends Polymer.Element
         return {
             hass: Object,
             config: Object,
-            base: Object,
             sizes: {
                 type: Object,
                 readonly: true
@@ -223,7 +249,6 @@ class HoneycombMenu extends Polymer.Element
                 box-sizing: border-box;
                 width: var(--item-size);
                 padding: var(--spacing);
-                pointer-events: none;
             }
             honeycomb-menu-item, xy-pad {
                 animation-duration: 1s;
@@ -295,9 +320,12 @@ class HoneycombMenu extends Polymer.Element
         cardTools.provideHass(this);
 
         _.defaults(this.config, {
+            action: 'hold',
+            entity: null,
+            active: false,
+            autoclose: true,
             size: 225,
-            spacing: 2,
-            entity: this.base.entity
+            spacing: 2
         });
 
         // These aren't perfect calculations but produces the result we want
@@ -323,7 +351,7 @@ class HoneycombMenu extends Polymer.Element
         this._setCssVars();
     }
 
-    close( _item )
+    close( _item = null )
     {
         if( this.closing )
             return;
@@ -332,20 +360,14 @@ class HoneycombMenu extends Polymer.Element
 
         if( _item ) _item.setAttribute('selected', '');
 
-        var details = {
-            detail: {
-                item: _item || false
-            }
-        };
-
-        this.dispatchEvent( new CustomEvent('closing', details) );
+        fireEvent(this, 'closing', { item: _item });
         // Remove shade div earlier to allow clicking of other lovelace elements while the animation continues
         this.$.shade.addEventListener('animationend', function(e) {
             this.remove();
         });
         this.shadowRoot.querySelectorAll('honeycomb-menu-item')[5].addEventListener('animationend', e => {
             this.remove();
-            this.dispatchEvent( new CustomEvent('closed', details) );
+            fireEvent(this, 'closed', { item: _item });
         });
     }
 
@@ -356,10 +378,7 @@ class HoneycombMenu extends Polymer.Element
         {
             let button = {};
 
-            if( this.config.template_buttons && this.config.template_buttons[i] )
-                button = this.config.template_buttons[i];
-
-            if( this.config.buttons && this.config.buttons[i] && this.config.buttons[i] != 'skip' )
+            if( this.config.buttons && this.config.buttons[i] )
                 button = this.config.buttons[i];
 
             if( button == 'break' )
@@ -492,7 +511,6 @@ class HoneycombMenu extends Polymer.Element
     {
         if( _.isEmpty(item) )
             return item;
-
         return _.omit( _.merge( {}, this.config, item ), ['buttons', 'size', 'action', 'template_buttons', 'xy_pad', 'spacing'] );
     }
 

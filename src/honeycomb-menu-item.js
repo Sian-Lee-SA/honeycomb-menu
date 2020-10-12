@@ -156,5 +156,6 @@ class HoneycombMenuItem extends Polymer.Element
     {
         this.active = this.config.active && nVal.states[this.config.entity] && nVal.states[this.config.entity].state == 'on';
     }
+    
 };
 customElements.define(HoneycombMenuItem.is, HoneycombMenuItem);
