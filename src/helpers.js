@@ -3,10 +3,25 @@
  * @Date:   2020-04-23T02:41:27+09:30
  * @Email:  CQoute@gmail.com
  * @Filename: helpers.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-26T07:33:31+09:30
+ * @Last modified by:   Sian Croser <Sian-Lee-SA>
+ * @Last modified time: 2020-04-29T05:08:15+09:30
  * @License: GPL-3
  */
+
+export function fireEvent( _node, _event, _detail = {}, _options = {})
+{
+    const event = new Event( _event, Object.assign({
+        bubbles: true,
+        cancelable: false,
+        composed: true
+    }, _options));
+
+    event.detail = _detail;
+
+    _node.dispatchEvent(event);
+
+    return event;
+};
 
 export function evalTemplate(hass, state, func)
 {
@@ -24,13 +39,13 @@ export function evalTemplate(hass, state, func)
         e.name = 'ButtonCardJSTemplateError';
         throw e;
     }
-}
+};
 
 export function objectEvalTemplate(hass, state, obj, _callback)
 {
     const objClone = Object.assign({}, obj);
     return getTemplateOrValue(hass, state, objClone, _callback);
-}
+};
 
 export default function getTemplateOrValue(hass, state, value, _callback)
 {
@@ -52,4 +67,4 @@ export default function getTemplateOrValue(hass, state, value, _callback)
     } else {
         return value;
     }
-}
+};
