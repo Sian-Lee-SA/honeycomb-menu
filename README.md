@@ -49,6 +49,22 @@ when you define a card into your layout, you can just add honeycomb to the card 
     honeycomb:
 ```
 
+Alternatively if a card has a call-service action, you can call the honeycomb service while passing the config options as the service data without the need for the action option
+
+```yaml
+- type: vertical-stack
+  cards:
+  - type: button
+    entity: light.kitchen
+    hold_action:
+      action: call-service
+      service: honeycomb
+      service_data:
+        template: light
+        autoclose: false
+        active: true
+```
+
 ## `honeycomb:` Options
 
 Option          | Values        | Default   | Details

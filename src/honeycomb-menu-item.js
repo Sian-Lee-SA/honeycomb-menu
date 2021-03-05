@@ -51,7 +51,8 @@ class HoneycombMenuItem extends Polymer.Element
             :host {
             }
             :host([active]) {
-                --paper-card-background-color: var(--paper-card-active-background-color);
+                --ha-card-background: var(--ha-card-active-background);
+                --paper-item-icon-color: var(--paper-item-icon-active-color);
             }
             .honey {
                 list-style-type: none;
@@ -146,7 +147,7 @@ class HoneycombMenuItem extends Polymer.Element
         });
 
         var sheet = new CSSStyleSheet
-        sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; }`);
+        sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; padding: 0 !important; }`);
         card.shadowRoot.adoptedStyleSheets = [ ...card.shadowRoot.adoptedStyleSheets, sheet ];
 
         return card;
@@ -156,6 +157,6 @@ class HoneycombMenuItem extends Polymer.Element
     {
         this.active = this.config.active && nVal.states[this.config.entity] && nVal.states[this.config.entity].state == 'on';
     }
-    
+
 };
 customElements.define(HoneycombMenuItem.is, HoneycombMenuItem);

@@ -17,6 +17,7 @@ import { objectEvalTemplate, fireEvent } from "./helpers.js";
 
 // Hook / Hack the HaCard to handle our needs and allow instantiating the hoeycomb
 customElements.whenDefined('ha-card').then(() => {
+
     const HaCard = customElements.get('ha-card');
 
     Object.assign( HaCard.prototype, EventManager.prototype );
@@ -52,6 +53,63 @@ customElements.whenDefined('ha-card').then(() => {
     document.addEventListener('touchstart', manager.handleXYPosition, false);
     document.addEventListener('mousedown', manager.handleXYPosition, false);
 
+    function showHoneycombMenu( _config )
+    {
+        // Remove any lingering honeycom menus as there should only be one active at a time
+        if( manager.honeycomb )
+            manager.honeycomb.close();
+
+        manager.honeycomb = document.createElement('honeycomb-menu');
+        // Some configs can be non extensible so we make them
+        // extensible
+        manager.honeycomb.config = _config;
+        manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
+        manager.honeycomb.addEventListener('closing', e => {
+            manager.honeycomb = null;
+        });
+    }
+
+    function traverseConfigs( _config )
+    {
+        if( _.isString(_config) )
+            _config = cardTools.lovelace.config.honeycomb_menu_templates[_config];
+        // Allow non extensible to be a new object that can be extended. Using
+        // merge will also affect sub properties
+        _config = _.merge({}, _config );
+        // If there are no buttons then we want it defined for returned calculations
+        if( ! _config.buttons )
+            _config.buttons = new Array(6);
+
+        if( ! _config.template ||
+            ! cardTools.lovelace.config.honeycomb_menu_templates ||
+            ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
+        ) return _config;
+
+        let pConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template] );
+
+        for( let i = 0; i < 6; i++ )
+        {
+            if( ! _config.buttons[i] || _config.buttons[i] == 'skip' )
+                _config.buttons[i] = pConfig.buttons[i];
+        }
+        return Object.assign({}, pConfig, _config );
+    }
+
+
+    let hass = document.querySelector('home-assistant').hass;
+    hass._callService = hass.callService
+    hass.callService = function(domain, service, data)
+    {
+        if( domain != 'honeycomb' )
+            return hass._callService(domain, service, data);
+
+        var honeycombConfig = traverseConfigs( data );
+        if( honeycombConfig.entity_id && ! honeycombConfig.entity )
+            honeycombConfig.entity = honeycombConfig.entity_id;
+
+        showHoneycombMenu(honeycombConfig);
+    }
+
     // Store a reference to a preveious hook eg. card-mod which allows
     // us to call it
     HaCard.prototype._firstUpdated = HaCard.prototype.firstUpdated;
@@ -63,33 +121,9 @@ customElements.whenDefined('ha-card').then(() => {
         if( ! config || ! config.honeycomb )
             return;
 
-        function traverseConfigs( _config )
-        {
-            if( _.isString(_config) )
-                _config = cardTools.lovelace.config.honeycomb_menu_templates[_config];
-            // Allow non extensible to be a new object that can be extended. Using
-            // merge will also affect sub properties
-            _config = _.merge({}, _config );
-            // If there are no buttons then we want it defined for returned calculations
-            if( ! _config.buttons )
-                _config.buttons = new Array(6);
 
-            if( ! _config.template ||
-                ! cardTools.lovelace.config.honeycomb_menu_templates ||
-                ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
-            ) return _config;
 
-            let pConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template] );
-
-            for( let i = 0; i < 6; i++ )
-            {
-                if( ! _config.buttons[i] || _config.buttons[i] == 'skip' )
-                    _config.buttons[i] = pConfig.buttons[i];
-            }
-            return Object.assign({}, pConfig, _config );
-        }
-
-        const honeycombConfig = traverseConfigs( config.honeycomb );
+        var honeycombConfig = traverseConfigs( config.honeycomb );
         if( ! honeycombConfig.entity )
             honeycombConfig.entity = config.entity;
 
@@ -114,19 +148,7 @@ customElements.whenDefined('ha-card').then(() => {
                 return;
 
             e.stopImmediatePropagation();
-
-            // Remove any lingering honeycom menus as there should only be one active at a time
-            if( manager.honeycomb )
-                manager.honeycomb.close();
-
-            manager.honeycomb = document.createElement('honeycomb-menu');
-            // Some configs can be non extensible so we make them
-            // extensible
-            manager.honeycomb.config = honeycombConfig;
-            manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
-            manager.honeycomb.addEventListener('closing', e => {
-                manager.honeycomb = null;
-            });
+            showHoneycombMenu( honeycombConfig );
         }, { useCapture: false, passive: false, once: false });
     }
 });
@@ -430,8 +452,8 @@ class HoneycombMenu extends Polymer.Element
 
         this._setCssVarProperty('--paper-item-icon-color', '--honeycomb-menu-icon-color');
         this._setCssVarProperty('--paper-item-icon-active-color', '--honeycomb-menu-icon-active-color');
-        this._setCssVarProperty('--paper-card-background-color', '--honeycomb-menu-background-color');
-        this._setCssVarProperty('--paper-card-active-background-color', '--honeycomb-menu-active-background-color');
+        this._setCssVarProperty('--ha-card-background', '--honeycomb-menu-background-color');
+        this._setCssVarProperty('--ha-card-active-background', '--honeycomb-menu-active-background-color');
     }
 
     _handleShadeClick(e)
