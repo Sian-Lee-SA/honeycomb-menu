@@ -181,3 +181,38 @@ honeycomb:
         brightness: '{{ x_percentage }}'
         percentage: true
 ```
+
+An example for the `active` option could be used to determine a fan state...
+
+```yaml
+honeycomb:
+    entity: fan.master_bedroom
+    buttons:
+      - icon: 'mdi:information-variant'
+        tap_action:
+          action: more-info
+      - icon: 'mdi:fan-speed-1'
+        active: '[[[ return entity.attributes.speed == "low" ]]]'
+        tap_action:
+          action: call-service
+          service: fan.set_speed
+          service_data:
+            entity_id: entity
+            speed: low
+      - icon: 'mdi:fan-speed-2'
+        active: '[[[ return entity.attributes.speed == "medium" ]]]'
+        tap_action:
+          action: call-service
+          service: fan.set_speed
+          service_data:
+            entity_id: entity
+            speed: medium
+      - icon: 'mdi:fan-speed-3'
+        active: '[[[ return entity.attributes.speed == "high" ]]]'
+        tap_action:
+          action: call-service
+          service: fan.set_speed
+          service_data:
+            entity_id: entity
+            speed: high
+```
