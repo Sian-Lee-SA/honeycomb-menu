@@ -121,8 +121,6 @@ customElements.whenDefined('ha-card').then(() => {
         if( ! config || ! config.honeycomb )
             return;
 
-
-
         var honeycombConfig = traverseConfigs( config.honeycomb );
         if( ! honeycombConfig.entity )
             honeycombConfig.entity = config.entity;

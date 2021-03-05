@@ -73,7 +73,7 @@ action          | `tap \| hold \| double_tap` | `hold` | Define the action that 
 entity | `any:entity_id` | `card:entity` | This will call actions on the entity (entity_id) defined. If omitted then the card entity will be used.
 template_buttons | `list[0-5]`: [Button](#button-options) `\| break` | `null` | if using template or card options then this will allow the use of both card and template button configs. `break` will disable the honeycomb on the index.
 buttons | `list[0-5]`: [Button](#button-options) `\| skip \| break` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
-active | `true \| false` | `false` | Setting this to true will apply active styles based on the entity it's assigned to
+active | `true \| false \| template` | `false` | Setting this to true will apply active styles based on the entity it's assigned to. You can also choose to use a template and return a boolean value. See [Templating](#templating)
 autoclose | `true \| false` | `true` | Close the menu if a button is pressed
 audio | `any:url_path` | `null` | Point to a audio file that will play when a button has been tapped
 xy_pad | [XYPad](#xypad-options) | `null` | This will allow the adding of a xy pin in the middle of the honeycombs which can execute a service based on the x or y value
@@ -131,12 +131,12 @@ styes {
 ```
 
 ## Templating
-Templating is currently available for all `XYConfig:service_data` properties. Templating allows flexibility and provide values based on the xy pads positions.
+Templating is currently available for all `XYConfig:service_data` properties and `active` option. Templating allows flexibility and provide values based on the xy pads positions.
 
 A property only containing the word **entity** will be converted to the `honeycomb:entity` value.
 
 There are two templating syntax's
-1. Uses `{{ variable }}` syntax to retrieve the xy pad event variables. These variables come with either a negative or positive values depending on direction from center
+1. Uses `{{ variable }}` syntax to retrieve the xy pad event variables. These variables come with either a negative or positive values depending on direction from center. * Does not apply to `active` option
         Available variables are:
 
         x: Pixels from the x center position

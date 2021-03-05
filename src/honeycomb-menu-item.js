@@ -7,6 +7,7 @@
  * @Last modified time: 2020-04-27T06:55:33+09:30
  * @License: GPL-3
  */
+import { getTemplateOrValue } from "./helpers.js";
 
 var cardTools = customElements.get('card-tools');
 
@@ -155,7 +156,14 @@ class HoneycombMenuItem extends Polymer.Element
 
     _hassObserver( nVal, oVal )
     {
-        this.active = this.config.active && nVal.states[this.config.entity] && nVal.states[this.config.entity].state == 'on';
+        if( typeof this.config.active == 'boolean' )
+        {
+            this.active = this.config.active && nVal.states[this.config.entity] && nVal.states[this.config.entity].state == 'on';
+        }
+        if( typeof this.config.active == 'string' )
+        {
+            this.active = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.active);
+        }
     }
 
 };

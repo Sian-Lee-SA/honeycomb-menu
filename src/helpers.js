@@ -47,7 +47,7 @@ export function objectEvalTemplate(hass, state, obj, _callback)
     return getTemplateOrValue(hass, state, objClone, _callback);
 };
 
-export default function getTemplateOrValue(hass, state, value, _callback)
+export function getTemplateOrValue(hass, state, value, _callback)
 {
     if (['number', 'boolean'].includes(typeof value)) return value;
     if (!value) return value;
