@@ -7,7 +7,7 @@
  * @Last modified time: 2020-04-27T06:55:33+09:30
  * @License: GPL-3
  */
-import { getTemplateOrValue } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue } from "./helpers.js";
 
 var cardTools = customElements.get('card-tools');
 
@@ -26,6 +26,7 @@ class HoneycombMenuItem extends Polymer.Element
                 observer: '_hassObserver'
             },
             config: Object,
+            variables: Object,
             size: Number,
             color: String,
             icon: String,
@@ -112,8 +113,7 @@ class HoneycombMenuItem extends Polymer.Element
     ready()
     {
         super.ready();
-
-        if( this.config.type == 'break' || _.isEmpty(this.config) )
+        if( this.config.type == 'break' || _.isEmpty(this.config) || this.config.disabled )
         {
             this.disabled = true;
             return;
@@ -123,13 +123,28 @@ class HoneycombMenuItem extends Polymer.Element
         this.config = _.assign({
             autoclose: true,
             audio: true,
-            active: false
+            active: false,
+            variables: {},
         }, this.config);
 
         if( ! this.config.active )
             this.style.setProperty('--paper-item-icon-active-color', 'var(--paper-item-icon-color)');
 
+        this._parseTemplates();
         this.$.item.append( this._createLovelaceCard() );
+    }
+
+    _parseTemplates()
+    {
+        this.config.entity = getTemplateOrValue( this.hass, null, this.config.variables, this.config.entity );
+
+        for( let key in this.config )
+        {
+            if( ['tap_action', 'hold_action', 'double_tap_action'].indexOf(key) > -1 )
+            {
+                this.config[key] = objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config[key] );
+            }
+        }
     }
 
     _createLovelaceCard()
@@ -162,7 +177,7 @@ class HoneycombMenuItem extends Polymer.Element
         }
         if( typeof this.config.active == 'string' )
         {
-            this.active = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.active);
+            this.active = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config.active);
         }
     }
 

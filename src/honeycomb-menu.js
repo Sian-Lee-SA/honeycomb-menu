@@ -10,146 +10,101 @@
 
 const _ = require('lodash');
 
-import EventManager from './event-manager.js';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate, fireEvent } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, fireEvent } from "./helpers.js";
 
-// Hook / Hack the HaCard to handle our needs and allow instantiating the hoeycomb
-customElements.whenDefined('ha-card').then(() => {
 
-    const HaCard = customElements.get('ha-card');
+const hass = document.querySelector('home-assistant').hass;
+_.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
-    Object.assign( HaCard.prototype, EventManager.prototype );
-
-    _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
-
-    const findConfig = function(node) {
-        if(node.config)
-            return node.config;
-        if(node._config)
-            return node._config;
-        if(node.host)
-            return findConfig(node.host);
-        if(node.parentElement)
-            return findConfig(node.parentElement);
-        if(node.parentNode)
-            return findConfig(node.parentNode);
-        return null;
+const manager = new function() {
+    this.honeycomb = null;
+    this.position = {
+        x: 0,
+        y: 0
     };
+    this.handleXYPosition = function(e) {
+        this.position.x = (e.type === "touchstart") ? e.touches[0].clientX : e.clientX;
+        this.position.y = (e.type === "touchstart") ? e.touches[0].clientY : e.clientY;
+    }.bind(this);
+};
 
-    const manager = new function() {
-        this.honeycomb = null;
-        this.position = {
-            x: 0,
-            y: 0
-        };
-        this.handleXYPosition = function(e) {
-            this.position.x = (e.type === "touchstart") ? e.touches[0].clientX : e.clientX;
-            this.position.y = (e.type === "touchstart") ? e.touches[0].clientY : e.clientY;
-        }.bind(this);
-    };
+document.addEventListener('touchstart', manager.handleXYPosition, false);
+document.addEventListener('mousedown', manager.handleXYPosition, false);
 
-    document.addEventListener('touchstart', manager.handleXYPosition, false);
-    document.addEventListener('mousedown', manager.handleXYPosition, false);
+function showHoneycombMenu( _config )
+{
+    // Remove any lingering honeycom menus as there should only be one active at a time
+    if( manager.honeycomb )
+        manager.honeycomb.close();
 
-    function showHoneycombMenu( _config )
+    manager.honeycomb = document.createElement('honeycomb-menu');
+    // Some configs can be non extensible so we make them
+    // extensible
+    manager.honeycomb.config = _config;
+    manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
+    manager.honeycomb.addEventListener('closing', e => {
+        manager.honeycomb = null;
+    });
+}
+
+function traverseConfigs( _config, _buttons )
+{
+	if( ! _buttons )
+	{
+		_buttons = new Array(6);
+		for( let i = 0; i < 6; i++ )
+		{
+			_buttons[i] = new Array();
+		}
+	}
+
+    function bindButtons( _cfg )
     {
-        // Remove any lingering honeycom menus as there should only be one active at a time
-        if( manager.honeycomb )
-            manager.honeycomb.close();
-
-        manager.honeycomb = document.createElement('honeycomb-menu');
-        // Some configs can be non extensible so we make them
-        // extensible
-        manager.honeycomb.config = _config;
-        manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
-        manager.honeycomb.addEventListener('closing', e => {
-            manager.honeycomb = null;
-        });
+        if( _cfg.buttons )
+            _cfg.buttons.forEach( (b, i) => {
+                if( b.position )
+                    _buttons[b.position].unshift(b);
+                else
+                    _buttons[i].unshift(b);
+            });
+        return { buttons: _buttons };
     }
 
-    function traverseConfigs( _config )
-    {
-        if( _.isString(_config) )
-            _config = cardTools.lovelace.config.honeycomb_menu_templates[_config];
-        // Allow non extensible to be a new object that can be extended. Using
-        // merge will also affect sub properties
-        _config = _.merge({}, _config );
-        // If there are no buttons then we want it defined for returned calculations
-        if( ! _config.buttons )
-            _config.buttons = new Array(6);
+    // Allow non extensible to be a new object that can be extended. Using
+    // merge will also affect sub properties
+    _config = _.merge({}, _config );
 
-        if( ! _config.template ||
-            ! cardTools.lovelace.config.honeycomb_menu_templates ||
-            ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
-        ) return _config;
 
-        let pConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template] );
-
-        for( let i = 0; i < 6; i++ )
-        {
-            if( ! _config.buttons[i] || _config.buttons[i] == 'skip' )
-                _config.buttons[i] = pConfig.buttons[i];
-        }
-        return Object.assign({}, pConfig, _config );
+    if( ! _config.template ||
+        ! cardTools.lovelace.config.honeycomb_menu_templates ||
+        ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
+    ) {
+        return Object.assign({}, _config, bindButtons( _config ));
     }
 
+    let parentConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template], _buttons );
 
-    let hass = document.querySelector('home-assistant').hass;
-    hass._callService = hass.callService
-    hass.callService = function(domain, service, data)
-    {
-        if( domain != 'honeycomb' )
-            return hass._callService(domain, service, data);
+    // Delete the template property so the button doesn't hook into it
+    delete _config.template;
 
-        var honeycombConfig = traverseConfigs( data );
-        if( honeycombConfig.entity_id && ! honeycombConfig.entity )
-            honeycombConfig.entity = honeycombConfig.entity_id;
+    return Object.assign({}, parentConfig, _config, bindButtons( _config ));
+}
 
-        showHoneycombMenu(honeycombConfig);
-    }
+hass._callService = hass.callService
+hass.callService = function(domain, service, data)
+{
+    if( domain != 'honeycomb' )
+        return hass._callService(domain, service, data);
 
-    // Store a reference to a preveious hook eg. card-mod which allows
-    // us to call it
-    HaCard.prototype._firstUpdated = HaCard.prototype.firstUpdated;
-    HaCard.prototype.firstUpdated = function(changedProperties)
-    {
-        this._firstUpdated(changedProperties);
-        const config = findConfig(this);
+    var honeycombConfig = traverseConfigs( data );
 
-        if( ! config || ! config.honeycomb )
-            return;
+    if( honeycombConfig.entity_id && ! honeycombConfig.entity )
+        honeycombConfig.entity = honeycombConfig.entity_id;
 
-        var honeycombConfig = traverseConfigs( config.honeycomb );
-        if( ! honeycombConfig.entity )
-            honeycombConfig.entity = config.entity;
-
-        // console.dir(honeycombConfig);
-        // Remove the following listeners that were defined by ActionHandler so to avoid duplicates
-        // this.removeEventListeners(['contextmenu', 'touchstart', 'touchend', 'touchcancel', 'click', 'keyup']);
-
-        // We need to set actionHandler false so bind on action-handler will process and assign eventListeners
-        this.actionHandler = false;
-        // We can't assume whether or not the parent card doesn't handle a double_tap or hold etc so we make it enabled
-        // regardless of our config action
-        document.body.querySelector("action-handler").bind(this, {
-            hasHold: true,
-            hasDoubleClick: true
-        });
-
-        // Push our action listener to the top of the list so we can
-        // see if our menu was trigger and to stop propagation if so...
-        // If not, then the event will follow through to the other listeners
-        this.prependEventListener('action', e => {
-            if( e.detail.action != honeycombConfig.action || manager.honeycomb != null )
-                return;
-
-            e.stopImmediatePropagation();
-            showHoneycombMenu( honeycombConfig );
-        }, { useCapture: false, passive: false, once: false });
-    }
-});
+    showHoneycombMenu(honeycombConfig);
+}
 
 class HoneycombMenu extends Polymer.Element
 {
@@ -167,6 +122,7 @@ class HoneycombMenu extends Polymer.Element
                 type: Object,
                 readonly: true
             },
+            variables: Object,
             closing: {
                 type: Boolean,
                 reflectToAttribute: true,
@@ -237,7 +193,7 @@ class HoneycombMenu extends Polymer.Element
             :host {
                 position: absolute;
             }
-            :host([closing]) {
+            :host([closing]), :host([closing]) * {
                 pointer-events: none !important;
             }
             .shade {
@@ -344,6 +300,7 @@ class HoneycombMenu extends Polymer.Element
             entity: null,
             active: false,
             autoclose: true,
+            variables: {},
             size: 225,
             spacing: 2
         });
@@ -397,9 +354,11 @@ class HoneycombMenu extends Polymer.Element
         for( let i = 0; i < 6; i++ )
         {
             let button = {};
-
-            if( this.config.buttons && this.config.buttons[i] )
-                button = this.config.buttons[i];
+			this.config.buttons[i].forEach((b, i) => {
+				if(b.show && ! getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, b.show ))
+                    return;
+                return button = b;
+			});
 
             if( button == 'break' )
                 button = {};
@@ -505,7 +464,7 @@ class HoneycombMenu extends Polymer.Element
         if( ! data )
             return new Object();
 
-        return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], data, (val) => {
+        return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], {}, data, (val) => {
             if( val == 'entity' )
                 return this.config.entity;
             return _.template(val)(vars);
@@ -531,7 +490,7 @@ class HoneycombMenu extends Polymer.Element
     {
         if( _.isEmpty(item) )
             return item;
-        return _.omit( _.merge( {}, this.config, item ), ['buttons', 'size', 'action', 'template_buttons', 'xy_pad', 'spacing'] );
+        return _.omit( _.merge( {}, this.config, item ), ['buttons', 'size', 'action', 'xy_pad', 'spacing'] );
     }
 
     _computeAnimateDelay( i )
