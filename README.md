@@ -34,22 +34,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
         1. Ensure Resource type is left as Javascript Module
 
 ## How to use
-when you define a card into your layout, you can just add honeycomb to the card config
-```yaml
-- type: vertical-stack
-  cards:
-  - type: custom:button-card
-    entity: light.kitchen
-    # custom:button-card Templates can also hold
-    # honeycomb options and is written as the same
-    template: light
-    # below will bind the honeycomb to this card
-    # This can be omited if honeycomb is already in template
-    # Or you can simply merge and override the template values
-    honeycomb:
-```
-
-Alternatively if a card has a call-service action, you can call the honeycomb service while passing the config options as the service data without the need for the action option
+call-service action, you can call the honeycomb service while passing the config options as the service data without the need for the action option. Any card or module that uses the hass.callService can invoke the honeycomb menu
 
 ```yaml
 - type: vertical-stack
@@ -63,15 +48,14 @@ Alternatively if a card has a call-service action, you can call the honeycomb se
         template: light
         autoclose: false
         active: true
+        ...
 ```
 
 ## `honeycomb:` Options
 
 Option          | Values        | Default   | Details
 --              | -             |-          |-
-action          | `tap \| hold \| double_tap` | `hold` | Define the action that will activate the honeycomb menu (the action is bound to the card). It maybe wise to ensure this action doesn't bubble that will execute the cards default action; so for [custom:button-card](https://github.com/custom-cards/button-card) just make sure the options for that card doesn't conflict with same action that opens honeycomb unless you have unique reasons to do so.
 entity | `any:entity_id` | `card:entity` | This will call actions on the entity (entity_id) defined. If omitted then the card entity will be used.
-template_buttons | `list[0-5]`: [Button](#button-options) `\| break` | `null` | if using template or card options then this will allow the use of both card and template button configs. `break` will disable the honeycomb on the index.
 buttons | `list[0-5]`: [Button](#button-options) `\| skip \| break` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
 active | `true \| false \| template` | `false` | Setting this to true will apply active styles based on the entity it's assigned to. You can also choose to use a template and return a boolean value. See [Templating](#templating)
 autoclose | `true \| false` | `true` | Close the menu if a button is pressed
@@ -79,6 +63,7 @@ audio | `any:url_path` | `null` | Point to a audio file that will play when a bu
 xy_pad | [XYPad](#xypad-options) | `null` | This will allow the adding of a xy pin in the middle of the honeycombs which can execute a service based on the x or y value
 size | `int:px` | `225` | The size in px of the honeycomb menu. Each button item grows with the size
 spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb item
+variables | `object` | `null` | Variables can be accessed through parent templates and templating code via `variables.foo` with `foo` being the variable name. See [Example](#example-using-variables)
 
 ## `Button` Options
 
@@ -86,9 +71,11 @@ Option          | Values        | Default   | Details
 --              | -             | -         | -
 type | `any:card` | `custom:button-card` | The base card to use for the button **Be sure to set the underlying card to 100% height or it may not display correctly**
 active | `true \| false` | `honeycomb:active` | Override the honeycomb active property for this button item
+show | `true \| false` | `true` | Whether to display this button. If a parent template has an active button for this position then it will show instead. [Templating](#templating) can be used to return a boolean value
 autoclose | `true \| false` | `honeycomb:autoclose` | Override the honeycomb autoclose property for this button
 audio | `any:url_path` | `honeycomb:audio` | Override the honeycomb audio property for this button
-entity | `any:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity.
+entity | `any:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity. An entity ca be used in templates by accessing its variable `entity`
+position | `int` | `null` | The position index to place the button. This is helpful for overriding template buttons.
 icon | `any:icon` | `null` | Only adding here for reference to custom:button-card so you can show an icon for the item
 color | `any:css_color` | var(--honeycomb-menu-icon-color) | Color of icon or background (depending on custom:button-card config). Leaving the default value allows the theme to handle the color
 show_name | `true \| false` | `false` | Only relevant for cards that support this option
@@ -131,7 +118,7 @@ styes {
 ```
 
 ## Templating
-Templating is currently available for all `XYConfig:service_data` properties and `active` option. Templating allows flexibility and provide values based on the xy pads positions.
+Templating is currently available for all `XYConfig:service_data` properties and some config options. Templating allows flexibility and provide values based on the xy pads positions or config options.
 
 A property only containing the word **entity** will be converted to the `honeycomb:entity` value.
 
@@ -144,7 +131,7 @@ There are two templating syntax's
         x_percentage: Percentage of the x position
         y_percentage: Percentage of the y position
 
-1. Uses a modified version of [button-card](https://github.com/custom-cards/button-card) by [@RomRider](https://github.com/RomRider) templating system using the `[[[ return 'some_value' ]]]` syntax (remember to return your values!). Head over to [button-card templates](https://github.com/custom-cards/button-card#templates) for an insight to how this templating system works.
+1. Uses a modified version of [button-card](https://github.com/custom-cards/button-card) by [@RomRider](https://github.com/RomRider) templating system using the `[[[ return 'some_value' ]]]` syntax (remember to return your values!). Head over to [button-card templates](https://github.com/custom-cards/button-card#templates) for an insight to how this templating system works. Configs with variables defined can be accessed by the `variables` object.
 
 The first template syntax `{{ }}` will be parsed first allowing the [button-card templates](https://github.com/custom-cards/button-card#templates) syntax `[[[  ]]]` parser to work with the actual values from the xy pad. eg.
 
@@ -163,7 +150,9 @@ It's also possible to just use the first parser or second parser without the oth
 > Note: the following service `light.relative_brightnesss` is not a part of Home Assistant but instead is my own custom service that changes a lights brightness relatively. You could achieve the same outcome with the `light.turn_on` service and using the javascript template parser with some calculations
 
 ```yaml
-honeycomb:
+...
+service: honeycomb
+service_data:
   entity: light.kitchen
   xy_pad:
     x:
@@ -182,10 +171,12 @@ honeycomb:
         percentage: true
 ```
 
-An example for the `active` option could be used to determine a fan state...
+An example for templatable config options could be used to determine a fan state and set the button as active if fan is currently in that state eg...
 
 ```yaml
-honeycomb:
+...
+service: honeycomb
+service_data:
     entity: fan.master_bedroom
     buttons:
       - icon: 'mdi:information-variant'
@@ -216,3 +207,65 @@ honeycomb:
             entity_id: entity
             speed: high
 ```
+
+#### Example using variables
+Say you have defined a honeycomb menu template for lights, you can then allow the light template make logical conditions as to how it should render.
+
+edit the honeycomb menu templates file (*don't confuse templating with honeycomb templates)
+```yaml
+light:
+  variables:
+    timer: null
+    motion: null
+  audio: /local/audio/pin-drop.ogg
+  xy_pad:
+    repeat: 500
+    y:
+      invert: true
+      service: light.turn_on
+      service_data:
+        entity_id: entity
+        brightness_step_pct: '[[[ return {{ y_percentage }} / 10; ]]]'
+  buttons:
+    - icon: 'mdi:information-variant'
+      tap_action:
+        action: more-info
+    - icon: 'mdi:lightbulb'
+      active: true
+    - show: '[[[ return (variables.motion) ]]]'
+      entity: '[[[ return variables.motion ]]]'
+      icon: 'mdi:motion-sensor'
+      position: 4
+      active: true
+      tap_action:
+        action: toggle
+    - show: '[[[ return (variables.timer) ]]]'
+      entity: '[[[ return variables.timer ]]]'
+      icon: 'mdi:timer'
+      position: 5
+      active: true
+      tap_action:
+        action: toggle
+```
+
+With the example above, if a menu derives the light template then any menu that sets a timer or motion as a variable will show those menu items with the entity being set to the variable property. If the variable is not set then it won't show the menu item and instead will either show the next derived item for that item position or nothing.
+
+Below is an example on how to assign a menu to the above example.
+```yaml
+- type: 'custom:button-card'
+  entity: light.back_yard_garden_leds
+  hold_action:
+    action: call-service
+    service: honeycomb
+    service_data:
+      template: light
+      variables:
+        motion: automation.motion_back_yard_garden_leds
+```
+
+As shown, this allows us to minimize clutter while keeping things neat and consistent.
+
+##### Result
+![Example of variables](examples/example-variables.gif)
+
+Also note that templates can derive from another template which can also access these variables through the hierarchy 
