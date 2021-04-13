@@ -12,7 +12,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 ![Example of XYPad](examples/example-xypad.gif)
 
 Watch YouTube Demonstration
-[![Youtube Video](upload://ufMiwJy62qD8VJTynW4fXvRecLz.jpeg)](https://www.youtube.com/watch?v=oJ9Yr2dSqUk)
+[![Youtube Video](https://img.youtube.com/vi/oJ9Yr2dSqUk/0.jpg)](https://www.youtube.com/watch?v=oJ9Yr2dSqUk)
 
 ## Requirements
 1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
