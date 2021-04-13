@@ -11,7 +11,8 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 ![Example of Honeycomb](examples/example-1.gif)
 ![Example of XYPad](examples/example-xypad.gif)
 
-Watch YouTube Demonstration
+## Watch YouTube Demonstration
+
 [![Youtube Video](https://img.youtube.com/vi/oJ9Yr2dSqUk/0.jpg)](https://www.youtube.com/watch?v=oJ9Yr2dSqUk)
 
 ## Requirements
