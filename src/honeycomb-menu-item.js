@@ -131,6 +131,7 @@ class HoneycombMenuItem extends Polymer.Element
             this.style.setProperty('--paper-item-icon-active-color', 'var(--paper-item-icon-color)');
 
         this._parseTemplates();
+        this._hassObserver( this.hass );
         this.$.item.append( this._createLovelaceCard() );
     }
 

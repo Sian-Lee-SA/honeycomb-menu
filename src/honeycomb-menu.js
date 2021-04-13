@@ -357,8 +357,10 @@ class HoneycombMenu extends Polymer.Element
 
 			for( let b of this.config.buttons[i] )
 			{
-				if(b.show && ! getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, b.show ))
-					continue;
+				if(
+                    b.show && ! getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, b.show )
+                    || b == 'skip'
+                ) continue;
 				button = b;
 				break;
 			}

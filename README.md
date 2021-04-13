@@ -11,6 +11,9 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 ![Example of Honeycomb](examples/example-1.gif)
 ![Example of XYPad](examples/example-xypad.gif)
 
+Watch YouTube Demonstration
+[![Youtube Video](upload://ufMiwJy62qD8VJTynW4fXvRecLz.jpeg)](https://www.youtube.com/watch?v=oJ9Yr2dSqUk)
+
 ## Requirements
 1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
 
@@ -268,4 +271,4 @@ As shown, this allows us to minimize clutter while keeping things neat and consi
 ##### Result
 ![Example of variables](examples/example-variables.gif)
 
-Also note that templates can derive from another template which can also access these variables through the hierarchy 
+Also note that templates can derive from another template which can also access these variables through the hierarchy
