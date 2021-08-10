@@ -192,6 +192,7 @@ class HoneycombMenu extends Polymer.Element
 
             :host {
                 position: absolute;
+                z-index: 200;
             }
             :host([closing]), :host([closing]) * {
                 pointer-events: none !important;
