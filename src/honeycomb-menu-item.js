@@ -163,7 +163,7 @@ class HoneycombMenuItem extends Polymer.Element
             e.detail.audio = this.config.audio;
         });
 
-        var sheet = new CSSStyleSheet
+        var sheet = new CSSStyleSheet();
         sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; padding: 0 !important; }`);
         card.shadowRoot.adoptedStyleSheets = [ ...card.shadowRoot.adoptedStyleSheets, sheet ];
 
