@@ -21,7 +21,11 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 ## Requirements
 1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
 
-## How to install
+## Installation
+### HACS Install
+Honeycomb-Menu is available from [HACS](https://hacs.xyz/).
+
+### Manual Install
 1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
 1. Place the file into the `config/www` path of your home assistant installation
     > you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path
