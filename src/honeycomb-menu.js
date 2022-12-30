@@ -93,10 +93,12 @@ function traverseConfigs( _config, _buttons )
 }
 
 hass._callService = hass.callService
-hass.callService = function(domain, service, data)
+hass.callService = function(domain, service, data, target)
 {
+    
     if( domain != 'honeycomb' )
-        return hass._callService(domain, service, data);
+        return hass._callService(domain, service, data, target);
+
 
     var honeycombConfig = traverseConfigs( data );
 
@@ -106,6 +108,7 @@ hass.callService = function(domain, service, data)
     showHoneycombMenu(honeycombConfig);
 }
 
+customElements.whenDefined('card-tools').then(() => {
 class HoneycombMenu extends Polymer.Element
 {
     static get is()
@@ -511,3 +514,4 @@ class HoneycombMenu extends Polymer.Element
     }
 }
 customElements.define(HoneycombMenu.is, HoneycombMenu);
+});

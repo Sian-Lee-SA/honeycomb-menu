@@ -10,6 +10,7 @@
 import { objectEvalTemplate, getTemplateOrValue } from "./helpers.js";
 
 var cardTools = customElements.get('card-tools');
+const _ = require('lodash');
 
 class HoneycombMenuItem extends Polymer.Element
 {
@@ -95,6 +96,11 @@ class HoneycombMenuItem extends Polymer.Element
                 pointer-events: all;
                 height: 100%;
             }
+
+            #item > * {
+                height: 100%;
+            }
+            
             :host([disabled]) #item {
                 background: var(--honeycomb-menu-disabled, #9a9a9a6e);
             }
@@ -126,6 +132,13 @@ class HoneycombMenuItem extends Polymer.Element
             active: false,
             variables: {},
         }, this.config);
+
+        if( _.isString( this.config.tap_action ) )
+            this.config.tap_action = {'action':this.config.tap_action};
+        if( _.isString( this.config.hold_action ) )
+            this.config.hold_action = {'action':this.config.hold_action};
+        if( _.isString( this.config.double_tap_action ) )
+            this.config.double_tap_action = {'action':this.config.double_tap_action};
 
         if( ! this.config.active )
             this.style.setProperty('--paper-item-icon-active-color', 'var(--paper-item-icon-color)');
