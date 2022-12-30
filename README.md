@@ -115,12 +115,12 @@ service_data | `dict` | `null` | Provide any service data as a dictionary / obje
 Adding the following style properties to your theme `.yaml` file will override the defaults
 ```css
 /* Styles selector is used as a placeholder for syntax highlighting */
-styes {
+styles {
     --honeycomb-menu-icon-color: var(--paper-item-icon-color);
     --honeycomb-menu-icon-active-color: var(--paper-item-icon-active-color);
     --honeycomb-menu-background-color: var(--paper-card-background-color);
     --honeycomb-menu-active-background-color: var(--paper-card-active-background-color, var(--paper-card-background-color));
-	--honeycomb-menu-disabled: #9a9a9a6e
+	--honeycomb-menu-disabled: #9a9a9a6e;
 }
 ```
 
