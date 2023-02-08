@@ -99,7 +99,11 @@ hass.callService = function(domain, service, data, target)
     if( domain != 'honeycomb' )
         return hass._callService(domain, service, data, target);
 
-
+    if( typeof cardTools === 'undefined' )
+    {
+        console.error('Honeycomb Menu: Card Tools not loaded, if installed please hard refresh and clear browser cache otherwise please install card tools https://github.com/thomasloven/lovelace-card-tools');
+        return;
+    }
     var honeycombConfig = traverseConfigs( data );
 
     if( honeycombConfig.entity_id && ! honeycombConfig.entity )
