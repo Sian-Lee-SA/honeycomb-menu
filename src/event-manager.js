@@ -1,13 +1,3 @@
-/**
- * @Author: Sian Croser
- * @Date:   2020-04-26T06:46:43+09:30
- * @Email:  CQoute@gmail.com
- * @Filename: event-manager.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-26T11:58:35+09:30
- * @License: GPL-3
- */
-
 class EventManager {
 };
 

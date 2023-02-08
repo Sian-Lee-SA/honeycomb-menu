@@ -1,13 +1,3 @@
-/**
- * @Author: Sian Croser
- * @Date:   2020-04-23T02:41:27+09:30
- * @Email:  CQoute@gmail.com
- * @Filename: helpers.js
- * @Last modified by:   Sian Croser <Sian-Lee-SA>
- * @Last modified time: 2020-04-29T05:08:15+09:30
- * @License: GPL-3
- */
-
 export function fireEvent( _node, _event, _detail = {}, _options = {})
 {
     const event = new Event( _event, Object.assign({

@@ -1,12 +1,3 @@
-/**
- * @Author: Sian Croser
- * @Date:   2020-04-19T19:45:08+09:30
- * @Email:  CQoute@gmail.com
- * @Filename: comb.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-27T06:55:33+09:30
- * @License: GPL-3
- */
 import { objectEvalTemplate, getTemplateOrValue } from "./helpers.js";
 
 var cardTools = customElements.get('card-tools');

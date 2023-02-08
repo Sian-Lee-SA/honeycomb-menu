@@ -1,13 +1,3 @@
-/**
- * @Author: Sian Croser
- * @Date:   2020-04-22T20:48:29+09:30
- * @Email:  CQoute@gmail.com
- * @Filename: xy_pad.js
- * @Last modified by:   Sian Croser
- * @Last modified time: 2020-04-24T06:34:31+09:30
- * @License: GPL-3
- */
-
 class XYPad extends Polymer.Element
 {
     static get is()

@@ -1,13 +1,3 @@
-/**
- * @Author: Sian Croser
- * @Date:   2020-04-19T12:09:12+09:30
- * @Email:  CQoute@gmail.com
- * @Filename: honeycomb-menu.js
- * @Last modified by:   Sian Croser <Sian-Lee-SA>
- * @Last modified time: 2020-05-11T20:06:04+09:30
- * @License: GPL-3
- */
-
 const _ = require('lodash');
 
 import "./honeycomb-menu-item.js";
