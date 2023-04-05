@@ -225,7 +225,7 @@ class HoneycombMenu extends Polymer.Element
                 padding: var(--spacing);
             }
             honeycomb-menu-item, xy-pad {
-                animation-duration: 1s;
+                animation-duration: 0.5s;
                 animation-fill-mode: both;
                 animation-name: zoomIn;
             }
@@ -300,7 +300,8 @@ class HoneycombMenu extends Polymer.Element
             autoclose: true,
             variables: {},
             size: 225,
-            spacing: 2
+            spacing: 2,
+            animation_speed: 100
         });
 
         // These aren't perfect calculations but produces the result we want
@@ -504,7 +505,7 @@ class HoneycombMenu extends Polymer.Element
 
     _computeAnimateDelay( i )
     {
-        return 125 * i + 'ms';
+        return this.config.animation_speed * i + 'ms';
     }
 }
 customElements.define(HoneycombMenu.is, HoneycombMenu);

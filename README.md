@@ -71,6 +71,7 @@ xy_pad | [XYPad](#xypad-options) | `null` | This will allow the adding of a xy p
 size | `int:px` | `225` | The size in px of the honeycomb menu. Each button item grows with the size
 spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb item
 variables | `object` | `null` | Variables can be accessed through parent templates and templating code via `variables.foo` with `foo` being the variable name. See [Example](#example-using-variables)
+animation_speed | `int` | `100` | Change the speed of the animation to show the menu
 
 ## `Button` Options
 
