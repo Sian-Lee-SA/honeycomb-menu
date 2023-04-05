@@ -397,8 +397,8 @@ class HoneycombMenu extends Polymer.Element
         }
 
         let rect = this.view.getBoundingClientRect();
-        _x = _.clamp( _x - rect.left, bounds.min.x, bounds.max.x );
-        _y = _.clamp( _y - rect.top, bounds.min.y, bounds.max.y );
+        _x = _.clamp( _x - rect.left, bounds.min.x, bounds.max.x - 5 );
+        _y = _.clamp( _y - rect.top, bounds.min.y, bounds.max.y - 5 );
 
         this.style.left = `${_x - container.w}px`;
         this.style.top = `${_y - container.h}px`;
