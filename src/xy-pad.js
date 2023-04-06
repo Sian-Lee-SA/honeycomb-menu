@@ -1,4 +1,6 @@
-class XYPad extends Polymer.Element
+import { LitElement, html, css } from 'lit';
+
+class XYPad extends LitElement
 {
     static get is()
     {
@@ -8,23 +10,35 @@ class XYPad extends Polymer.Element
     static get properties()
     {
         return {
-            hass: Object,
-            config: Object,
-            size: Number,
-            clampX: Number,
-            clampY: Number,
+            hass: {
+                type: Object
+            },
+            config: {
+                type: Object
+            },
+            size: {
+                type: Number
+            },
+            clampX: {
+                type: Number
+            },
+            clampY: {
+                type: Number
+            },
             active: {
                 type: Boolean,
-                reflectToAttribute: true
+                reflect: true,
+                attribute: true
             },
-            _current: Object
+            _current: {
+                type: Object
+            }
         };
     }
 
-    static get template()
+    static get styles()
     {
-        return Polymer.html`
-            <style>
+        return css`
             :host {
                 position: absolute;
 
@@ -52,16 +66,21 @@ class XYPad extends Polymer.Element
             #joystick:active, :host([active]) #joystick {
                 box-shadow: 0px 0px 2px 5px #fbfbfb;
                 background: #c5c5c5;
-            }
-            </style>
-            <div id="joystick"></div>
-        `;
+            }`;
     }
 
-    ready()
+    render()
     {
-        super.ready();
+        return html`<div id="joystick"></div>`;
+    }
 
+    get joystick()
+    {
+        return this.shadowRoot.querySelector('#joystick');
+    }
+
+    firstUpdated()
+    {
         if( ! this.config.x )
             this.clampX = 0;
         if( ! this.config.y )
@@ -75,10 +94,11 @@ class XYPad extends Polymer.Element
 
     _setInitCssPositions()
     {
-        this.$.joystick.style.width = this.size + 'px';
-        this.$.joystick.style.height = this.size + 'px';
-        this.$.joystick.style.left = `calc( 50% - (${this.size}px / 2) )`;
-        this.$.joystick.style.top  = `calc( 50% - (${this.size}px / 2) )`;
+        const joy_ele = this.joystick;
+        joy_ele.style.width = this.size + 'px';
+        joy_ele.style.height = this.size + 'px';
+        joy_ele.style.left = `calc( 50% - (${this.size}px / 2) )`;
+        joy_ele.style.top  = `calc( 50% - (${this.size}px / 2) )`;
     }
 
     _bindListeners()
@@ -96,7 +116,7 @@ class XYPad extends Polymer.Element
     {
         this.active = false;
         this.style.zIndex = 0;
-        this.$.joystick.style.transform = 'translate3d(0, 0, 0)';
+        this.joystick.style.transform = 'translate3d(0, 0, 0)';
         this._current = {x: 0, y: 0};
         if( this._interval )
         {
@@ -120,12 +140,12 @@ class XYPad extends Polymer.Element
 
     _setPosition( _x, _y )
     {
-        _x = _x - this.$.joystick.offsetLeft - (this.size / 2);
-        _y = _y - this.$.joystick.offsetTop - (this.size / 2);
+        _x = _x - this.joystick.offsetLeft - (this.size / 2);
+        _y = _y - this.joystick.offsetTop - (this.size / 2);
         this._current.x = _.clamp(_x, -this.clampX, this.clampX);
         this._current.y = _.clamp(_y, -this.clampY, this.clampY);
 
-        this.$.joystick.style.transform = `translate3d(${this._current.x}px, ${this._current.y}px, 0)`;
+        this.joystick.style.transform = `translate3d(${this._current.x}px, ${this._current.y}px, 0)`;
 
         this.dispatchEvent( this.__constructEvent('drag') );
     }

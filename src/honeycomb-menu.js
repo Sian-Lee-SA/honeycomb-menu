@@ -1,5 +1,6 @@
 const _ = require('lodash');
 
+import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
 import { objectEvalTemplate, getTemplateOrValue, fireEvent } from "./helpers.js";
@@ -32,7 +33,8 @@ function showHoneycombMenu( _config )
     manager.honeycomb = document.createElement('honeycomb-menu');
     // Some configs can be non extensible so we make them
     // extensible
-    manager.honeycomb.config = _config;
+    // manager.honeycomb.config = _config;
+    manager.honeycomb.setConfig( _config )
     manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
     manager.honeycomb.addEventListener('closing', e => {
         manager.honeycomb = null;
@@ -103,7 +105,7 @@ hass.callService = function(domain, service, data, target)
 }
 
 customElements.whenDefined('card-tools').then(() => {
-class HoneycombMenu extends Polymer.Element
+class HoneycombMenu extends LitElement
 {
     static get is()
     {
@@ -113,78 +115,93 @@ class HoneycombMenu extends Polymer.Element
     static get properties()
     {
         return {
-            hass: Object,
-            config: Object,
+            hass: {
+                type: Object
+            },
+            config: {
+                type: Object
+            },
             sizes: {
                 type: Object,
                 readonly: true
             },
-            variables: Object,
+            variables: {
+                type: Object
+            },
             closing: {
                 type: Boolean,
-                reflectToAttribute: true,
-                value: false
+                attribute: true,
+                reflect: true
             },
-            view: Object,
-            buttons: Array,
+            view: {},
+            buttons: {
+                type: Array
+            },
             _service: {
-                type: Object,
-                value: {
-                    x: false,
-                    y: false
-                }
+                type: Object
             }
         }
     }
 
-    static get template()
+    constructor() 
     {
-        return Polymer.html`
-            <style>
+        super();
+
+        this.closing = false;
+        this.buttons = [];
+        this._service = {
+            x: false,
+            y: false
+        }
+    }
+
+    static get styles()
+    {
+        return css`
             @keyframes fadeIn { from {opacity: 0; } to { opacity: 1; } }
             @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
             @keyframes zoomIn {
-              from {
+            from {
                 opacity: 0;
                 transform: scale3d(0.3, 0.3, 0.3);
-              }
-              50% {
+            }
+            50% {
                 opacity: 1;
-              }
+            }
             }
             @keyframes zoomOut {
-              from {
+            from {
                 opacity: 1;
-              }
+            }
 
-              50% {
+            50% {
                 opacity: 0;
                 transform: scale3d(0.3, 0.3, 0.3);
-              }
+            }
 
-              to {
+            to {
                 opacity: 0;
-              }
+            }
             }
 
             @keyframes bounceOut {
-              20% {
+            20% {
                 -webkit-transform: scale3d(0.9, 0.9, 0.9);
                 transform: scale3d(0.9, 0.9, 0.9);
-              }
+            }
 
-              50%,
-              55% {
+            50%,
+            55% {
                 opacity: 1;
                 -webkit-transform: scale3d(1.1, 1.1, 1.1);
                 transform: scale3d(1.1, 1.1, 1.1);
-              }
+            }
 
-              to {
+            to {
                 opacity: 0;
                 -webkit-transform: scale3d(0.3, 0.3, 0.3);
                 transform: scale3d(0.3, 0.3, 0.3);
-              }
+            }
             }
 
             :host {
@@ -255,45 +272,45 @@ class HoneycombMenu extends Polymer.Element
             xy-pad {
                 width: var(--container-width);
                 height: var(--container-height);
-            }
-            </style>
-            <div id="shade" class="shade" on-click="_handleShadeClick"></div>
-            <audio id="audio"></audio>
-            <template is="dom-if" if="{{config.xy_pad}}">
-                <xy-pad
-                    style$="animation-delay: 500ms;"
-                    hass="[[hass]]"
-                    config="[[config.xy_pad]]"
-                    size="[[_computeXYPadSize()]]"
-                    clamp-x="[[_computeXYPadClamp()]]"
-                    clamp-y="[[_computeXYPadClamp()]]"
-                    on-drag="_handleXYPad"
-                    on-drag-interval="_handleXYPad"
-                    on-drag-end="_handleXYPad">
-                </xy-pad>
-            </template>
-
-            <div id="honeycombs" class="honeycombs">
-
-                <template is="dom-repeat" items="{{buttons}}">
-                    <honeycomb-menu-item
-                        hass="[[hass]]"
-                        style$="animation-delay: [[_computeAnimateDelay(index)]];"
-                        class="animated"
-                        config="[[_computeItemConfig(item)]]"
-                        on-action="_handleItemAction">
-                    </honeycomb-menu-item>
-                </template>
-            </div>
-        `;
+            }`;
     }
 
-    ready()
+    render()
     {
-        super.ready();
+        return html`
+            <div id="shade" class="shade" @click=${this._handleShadeClick}></div>
+            <audio id="audio"></audio>
+
+            ${(this.config.xy_pad) ? html`
+                <xy-pad
+                    style="animation-delay: ${this._computeAnimateDelay(1)};"
+                    .hass=${this.hass}
+                    .config=${this.config.xy_pad}
+                    .size=${this._computeXYPadSize()}
+                    .clampX=${this._computeXYPadClamp()}
+                    .clampY=${this._computeXYPadClamp()}
+                    @drag=${this._handleXYPad}
+                    @drag-interval=${this._handleXYPad}
+                    @drag-end=${this._handleXYPad}>
+                </xy-pad>`:''}
+
+            <div id="honeycombs" class="honeycombs">
+                ${this.buttons.map((v, i) => html`
+                <honeycomb-menu-item
+                    style="animation-delay: ${this._computeAnimateDelay(i)};"
+                    class="animated"
+                    .hass=${this.hass}
+                    .config=${this._computeItemConfig(v)}
+                    @action=${this._handleItemAction}>
+                </honeycomb-menu-item>`)}
+            </div>`;
+    }
+
+    setConfig( config )
+    {
         cardTools.provideHass(this);
 
-        _.defaults(this.config, {
+        _.defaults(config, {
             action: 'hold',
             entity: null,
             active: false,
@@ -303,7 +320,7 @@ class HoneycombMenu extends Polymer.Element
             spacing: 2,
             animation_speed: 100
         });
-
+        this.config = config;
         // These aren't perfect calculations but produces the result we want
         // honey combs are not 1:1 ratio's
         let itemSize = this.config.size / 3.586;
@@ -313,7 +330,7 @@ class HoneycombMenu extends Polymer.Element
             containerHeight: itemSize * 2.9
         };
 
-        this._assignButtons();
+        this._assignButtons();        
     }
 
     display(_view, _x, _y)
@@ -324,6 +341,10 @@ class HoneycombMenu extends Polymer.Element
         this.view.append( this );
 
         this._setPosition( _x, _y );
+    }
+
+    firstUpdated()
+    {
         this._setCssVars();
     }
 
@@ -338,7 +359,7 @@ class HoneycombMenu extends Polymer.Element
 
         fireEvent(this, 'closing', { item: _item });
         // Remove shade div earlier to allow clicking of other lovelace elements while the animation continues
-        this.$.shade.addEventListener('animationend', function(e) {
+        this.shadowRoot.querySelector('#shade').addEventListener('animationend', function(e) {
             this.remove();
         });
         this.shadowRoot.querySelectorAll('honeycomb-menu-item')[5].addEventListener('animationend', e => {
@@ -406,7 +427,7 @@ class HoneycombMenu extends Polymer.Element
 
     _setCssVarProperty(orig_property, var_property)
     {
-        this.$.honeycombs.style.setProperty(orig_property, `var(${var_property}, ${this.view.style.getPropertyValue(orig_property)})`, "important");
+        this.shadowRoot.querySelector('#honeycombs').style.setProperty(orig_property, `var(${var_property}, ${this.view.style.getPropertyValue(orig_property)})`, "important");
     }
 
     _setCssVars()
@@ -444,8 +465,13 @@ class HoneycombMenu extends Polymer.Element
     {
         if( ! _item.config.audio )
             return;
-        this.$.audio.src = _item.config.audio;
-        this.$.audio.play();
+
+        const audio_ele = this.shadowRoot.querySelector('#audio');
+        if( audio_ele )
+        {
+            audio_ele.src = _item.config.audio;
+            audio_ele.play();
+        }
     }
 
     _handleXYPad(e)

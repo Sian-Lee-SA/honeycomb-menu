@@ -1,9 +1,10 @@
+import { LitElement, html, css } from 'lit';
 import { objectEvalTemplate, getTemplateOrValue } from "./helpers.js";
 
-var cardTools = customElements.get('card-tools');
+const cardTools = customElements.get('card-tools');
 const _ = require('lodash');
 
-class HoneycombMenuItem extends Polymer.Element
+class HoneycombMenuItem extends LitElement
 {
     static get is()
     {
@@ -14,34 +15,94 @@ class HoneycombMenuItem extends Polymer.Element
     {
         return {
             hass: {
-                type: Object,
-                observer: '_hassObserver'
+                type: Object
             },
-            config: Object,
-            variables: Object,
-            size: Number,
-            color: String,
-            icon: String,
-            action: Object,
+            config: {
+                type: Object
+            },
+            variables: {
+                type: Object
+            },
+            size: {
+                type: Number
+            },
+            color: {
+                type: String
+            },
+            icon: {
+                type: String
+            },
+            action: {
+                type: Object
+            },
             disabled: {
                 type: Boolean,
-                value: false,
-                reflectToAttribute: true
+                reflect: true,
+                attribute: true
             },
-            audio: Boolean,
-            autoclose: Boolean,
+            audio: {
+                type: Boolean
+            },
+            autoclose: {
+                type: Boolean
+            },
             active: {
                 type: Boolean,
-                value: false,
-                reflectToAttribute: true
+                reflect: true,
+                attribute: true
             }
-        }
+        };
     }
 
-    static get template()
+    set hass( obj )
     {
-        return Polymer.html`
-            <style>
+        this._hass = obj;
+        this._computeIsActive();
+    }
+
+    get hass()
+    {
+        return this._hass;
+    }
+
+    set config( config )
+    {
+        if( config.type == 'break' || _.isEmpty(config) || config.disabled )
+        {
+            this.disabled = true;
+            return;
+        }
+
+        // Assign Defaults
+        this._config = _.assign({
+            autoclose: true,
+            audio: true,
+            active: false,
+            variables: {},
+        }, config);
+
+        if( _.isString( this._config.tap_action ) )
+            this._config.tap_action = {'action': this._config.tap_action};
+        if( _.isString( this._config.hold_action ) )
+            this._config.hold_action = {'action': this._config.hold_action};
+        if( _.isString( this._config.double_tap_action ) )
+            this._config.double_tap_action = {'action': this._config.double_tap_action};
+
+        if( ! this._config.active )
+            this.style.setProperty('--paper-item-icon-active-color', 'var(--paper-item-icon-color)');
+
+        this._parseTemplates();
+        this._computeIsActive();
+    }
+
+    get config()
+    {
+        return this._config;
+    }
+
+    static get styles()
+    {
+        return css`
             :host {
             }
             :host([active]) {
@@ -94,49 +155,41 @@ class HoneycombMenuItem extends Polymer.Element
             
             :host([disabled]) #item {
                 background: var(--honeycomb-menu-disabled, #9a9a9a6e);
-            }
-            </style>
+            }        
+        `;
+    }
 
+    render()
+    {
+        return html`
             <div class="honeycomb">
                 <div class="honey">
                     <div class="comb">
                         <div id="item"></div>
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
 
-    ready()
+    _computeIsActive()
     {
-        super.ready();
-        if( this.config.type == 'break' || _.isEmpty(this.config) || this.config.disabled )
-        {
-            this.disabled = true;
+        if( ! this.config )
             return;
+
+        if( typeof this.config.active == 'boolean' )
+        {
+            this.active = this.config.active && this.hass.states[this.config.entity] && this.hass.states[this.config.entity].state == 'on';
         }
+        if( typeof this.config.active == 'string' )
+        {
+            this.active = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config.active);
+        }
+    }
 
-        // Assign Defaults
-        this.config = _.assign({
-            autoclose: true,
-            audio: true,
-            active: false,
-            variables: {},
-        }, this.config);
-
-        if( _.isString( this.config.tap_action ) )
-            this.config.tap_action = {'action':this.config.tap_action};
-        if( _.isString( this.config.hold_action ) )
-            this.config.hold_action = {'action':this.config.hold_action};
-        if( _.isString( this.config.double_tap_action ) )
-            this.config.double_tap_action = {'action':this.config.double_tap_action};
-
-        if( ! this.config.active )
-            this.style.setProperty('--paper-item-icon-active-color', 'var(--paper-item-icon-color)');
-
-        this._parseTemplates();
-        this._hassObserver( this.hass );
-        this.$.item.append( this._createLovelaceCard() );
+    firstUpdated()
+    {
+        if( !this.disabled )
+            this.shadowRoot.querySelector('#item').append( this._createLovelaceCard() );
     }
 
     _parseTemplates()
@@ -173,18 +226,5 @@ class HoneycombMenuItem extends Polymer.Element
 
         return card;
     }
-
-    _hassObserver( nVal, oVal )
-    {
-        if( typeof this.config.active == 'boolean' )
-        {
-            this.active = this.config.active && nVal.states[this.config.entity] && nVal.states[this.config.entity].state == 'on';
-        }
-        if( typeof this.config.active == 'string' )
-        {
-            this.active = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config.active);
-        }
-    }
-
 };
 customElements.define(HoneycombMenuItem.is, HoneycombMenuItem);
