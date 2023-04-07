@@ -1,5 +1,3 @@
-// const _ = require('lodash');
-
 import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
@@ -15,8 +13,6 @@ const clamp = require('lodash/clamp');
 const _template = require('lodash/template');
 const isEmpty = require('lodash/isEmpty');
 const _defaults = require('lodash/defaults');
-
-// _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 const manager = new function() {
     this.honeycomb = null;
@@ -42,7 +38,6 @@ function showHoneycombMenu( _config )
     manager.honeycomb = document.createElement('honeycomb-menu');
     // Some configs can be non extensible so we make them
     // extensible
-    // manager.honeycomb.config = _config;
     manager.honeycomb.setConfig( _config )
     manager.honeycomb.display( lovelace_view(), manager.position.x, manager.position.y );
     manager.honeycomb.addEventListener('closing', e => {

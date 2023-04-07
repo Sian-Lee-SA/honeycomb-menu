@@ -1,7 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { objectEvalTemplate, getTemplateOrValue, provideHass, createCard } from "./helpers.js";
 
-// const _ = require('lodash');
 const merge = require('lodash/merge');
 const assign = require('lodash/assign');
 const isEmpty = require('lodash/isEmpty');
