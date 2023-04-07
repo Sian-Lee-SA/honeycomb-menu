@@ -3,7 +3,7 @@ const _ = require('lodash');
 import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate, getTemplateOrValue, fireEvent } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view } from "./helpers.js";
 
 
 const hass = document.querySelector('home-assistant').hass;
@@ -35,7 +35,7 @@ function showHoneycombMenu( _config )
     // extensible
     // manager.honeycomb.config = _config;
     manager.honeycomb.setConfig( _config )
-    manager.honeycomb.display( cardTools.lovelace_view(), manager.position.x, manager.position.y );
+    manager.honeycomb.display( lovelace_view(), manager.position.x, manager.position.y );
     manager.honeycomb.addEventListener('closing', e => {
         manager.honeycomb = null;
     });
