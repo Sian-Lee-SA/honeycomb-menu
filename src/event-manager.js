@@ -1,3 +1,5 @@
+const isArray = require('lodash/isEmpty');
+
 class EventManager {
 };
 
@@ -30,7 +32,7 @@ EventManager.prototype.addEventListener = function( _event, _func, _options )
 
 EventManager.prototype.removeEventListeners = function(_event)
 {
-    if( _.isArray(_event) )
+    if( isArray(_event) )
         return _event.forEach( e => this.removeEventListeners(e) );
 
     this.getEvents(_event).forEach( o => {

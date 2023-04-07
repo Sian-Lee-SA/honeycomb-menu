@@ -1,7 +1,11 @@
 import { LitElement, html, css } from 'lit';
 import { objectEvalTemplate, getTemplateOrValue, provideHass, createCard } from "./helpers.js";
 
-const _ = require('lodash');
+// const _ = require('lodash');
+const merge = require('lodash/merge');
+const assign = require('lodash/assign');
+const isEmpty = require('lodash/isEmpty');
+const isString = require('lodash/isString');
 
 class HoneycombMenuItem extends LitElement
 {
@@ -66,25 +70,25 @@ class HoneycombMenuItem extends LitElement
 
     set config( config )
     {
-        if( config.type == 'break' || _.isEmpty(config) || config.disabled )
+        if( config.type == 'break' || isEmpty(config) || config.disabled )
         {
             this.disabled = true;
             return;
         }
 
         // Assign Defaults
-        this._config = _.assign({
+        this._config = assign({
             autoclose: true,
             audio: true,
             active: false,
             variables: {},
         }, config);
 
-        if( _.isString( this._config.tap_action ) )
+        if( isString( this._config.tap_action ) )
             this._config.tap_action = {'action': this._config.tap_action};
-        if( _.isString( this._config.hold_action ) )
+        if( isString( this._config.hold_action ) )
             this._config.hold_action = {'action': this._config.hold_action};
-        if( _.isString( this._config.double_tap_action ) )
+        if( isString( this._config.double_tap_action ) )
             this._config.double_tap_action = {'action': this._config.double_tap_action};
 
         if( ! this._config.active )
@@ -206,7 +210,7 @@ class HoneycombMenuItem extends LitElement
 
     _createLovelaceCard()
     {
-        var card = createCard(_.merge({}, {    
+        var card = createCard(merge({}, {    
             type: 'custom:button-card',
             size: '30px',
             show_name: false

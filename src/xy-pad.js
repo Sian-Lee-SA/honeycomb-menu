@@ -1,5 +1,7 @@
 import { LitElement, html, css } from 'lit';
 
+const clamp = require('lodash/clamp');
+
 class XYPad extends LitElement
 {
     static get is()
@@ -142,8 +144,8 @@ class XYPad extends LitElement
     {
         _x = _x - this.joystick.offsetLeft - (this.size / 2);
         _y = _y - this.joystick.offsetTop - (this.size / 2);
-        this._current.x = _.clamp(_x, -this.clampX, this.clampX);
-        this._current.y = _.clamp(_y, -this.clampY, this.clampY);
+        this._current.x = clamp(_x, -this.clampX, this.clampX);
+        this._current.y = clamp(_y, -this.clampY, this.clampY);
 
         this.joystick.style.transform = `translate3d(${this._current.x}px, ${this._current.y}px, 0)`;
 

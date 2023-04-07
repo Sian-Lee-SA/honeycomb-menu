@@ -1,4 +1,4 @@
-const _ = require('lodash');
+// const _ = require('lodash');
 
 import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
@@ -7,7 +7,16 @@ import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view, provi
 
 const honeycomb_templates = lovelace_config().honeycomb_menu_templates || null;
 const hass = document.querySelector('home-assistant').hass;
-_.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+
+const merge = require('lodash/merge');
+const omit = require('lodash/omit');
+const split = require('lodash/split');
+const clamp = require('lodash/clamp');
+const _template = require('lodash/template');
+const isEmpty = require('lodash/isEmpty');
+const _defaults = require('lodash/defaults');
+
+// _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 const manager = new function() {
     this.honeycomb = null;
@@ -66,7 +75,7 @@ function traverseConfigs( _config, _buttons )
 
     // Allow non extensible to be a new object that can be extended. Using
     // merge will also affect sub properties
-    _config = _.merge({}, _config );
+    _config = merge({}, _config );
 
 
     if( ! _config.template || ! honeycomb_templates || ! honeycomb_templates[_config.template] )
@@ -240,7 +249,6 @@ class HoneycombMenu extends LitElement
                 animation-name: zoomOut;
             }
             :host([closing]) honeycomb-menu-item[selected] {
-                animation-delay: 800ms !important;
                 animation-duration: 0.75s;
                 animation-name: bounceOut;
             }
@@ -269,7 +277,6 @@ class HoneycombMenu extends LitElement
     {
         return html`
             <div id="shade" class="shade" @click=${this._handleShadeClick}></div>
-            <audio id="audio"></audio>
 
             ${(this.config.xy_pad) ? html`
                 <xy-pad
@@ -288,7 +295,6 @@ class HoneycombMenu extends LitElement
                 ${this.buttons.map((v, i) => html`
                 <honeycomb-menu-item
                     style="animation-delay: ${this._computeAnimateDelay(i)};"
-                    class="animated"
                     .hass=${this.hass}
                     .config=${this._computeItemConfig(v)}
                     @action=${this._handleItemAction}>
@@ -300,7 +306,7 @@ class HoneycombMenu extends LitElement
     {
         provideHass(this);
 
-        _.defaults(config, {
+        _defaults(config, {
             action: 'hold',
             entity: null,
             active: false,
@@ -345,14 +351,20 @@ class HoneycombMenu extends LitElement
 
         this.closing = true;
 
-        if( _item ) _item.setAttribute('selected', '');
+        let ele = _item || this.shadowRoot.querySelectorAll('honeycomb-menu-item')[5];
+        if( _item )
+        {
+            _item.setAttribute('selected', '');
+            _item.setAttribute('style', `animation-delay: ${this._computeAnimateDelay(3)};`);
+        }
 
         fireEvent(this, 'closing', { item: _item });
         // Remove shade div earlier to allow clicking of other lovelace elements while the animation continues
         this.shadowRoot.querySelector('#shade').addEventListener('animationend', function(e) {
             this.remove();
         });
-        this.shadowRoot.querySelectorAll('honeycomb-menu-item')[5].addEventListener('animationend', e => {
+
+        ele.addEventListener('animationend', e => {
             this.remove();
             fireEvent(this, 'closed', { item: _item });
         });
@@ -385,7 +397,7 @@ class HoneycombMenu extends LitElement
                 button = {};
 
             // Clone to allow writable object from button-card
-            this.buttons[i] = _.merge({}, button);
+            this.buttons[i] = merge({}, button);
         }
     }
 
@@ -408,8 +420,8 @@ class HoneycombMenu extends LitElement
         }
 
         let rect = this.view.getBoundingClientRect();
-        _x = _.clamp( _x - rect.left, bounds.min.x, bounds.max.x - 5 );
-        _y = _.clamp( _y - rect.top, bounds.min.y, bounds.max.y - 5 );
+        _x = clamp( _x - rect.left, bounds.min.x, bounds.max.x - 5 );
+        _y = clamp( _y - rect.top, bounds.min.y, bounds.max.y - 5 );
 
         this.style.left = `${_x - container.w}px`;
         this.style.top = `${_y - container.h}px`;
@@ -456,12 +468,15 @@ class HoneycombMenu extends LitElement
         if( ! _item.config.audio )
             return;
 
-        const audio_ele = this.shadowRoot.querySelector('#audio');
-        if( audio_ele )
+        let audio_ele = document.querySelector('#honeycomb-audio');
+        if( ! audio_ele )
         {
-            audio_ele.src = _item.config.audio;
-            audio_ele.play();
+            audio_ele = document.createElement('audio');
+            audio_ele.id = 'honeycomb-audio';
+            document.querySelector("home-assistant").append(audio_ele);
         }
+        audio_ele.src = _item.config.audio;
+        audio_ele.play();
     }
 
     _handleXYPad(e)
@@ -477,7 +492,7 @@ class HoneycombMenu extends LitElement
                 return;
 
             this._service[axis] = true;
-            let service = _.split( config.service, '.', 2);
+            let service = split( config.service, '.', 2);
             this.hass
                 .callService( service[0], service[1], this.__renderServiceData(e.detail, config.service_data) )
                 .then(e => this._service[axis] = false);
@@ -493,7 +508,7 @@ class HoneycombMenu extends LitElement
         return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], {}, data, (val) => {
             if( val == 'entity' )
                 return this.config.entity;
-            return _.template(val)(vars);
+            return _template(val, {interpolate: /{{([\s\S]+?)}}/g})(vars);
         });
     }
 
@@ -514,9 +529,9 @@ class HoneycombMenu extends LitElement
 
     _computeItemConfig( item )
     {
-        if( _.isEmpty(item) )
+        if( isEmpty(item) )
             return item;
-        return _.omit( _.merge( {}, this.config, item ), ['buttons', 'size', 'action', 'xy_pad', 'spacing'] );
+        return omit( merge( {}, this.config, item ), ['buttons', 'size', 'action', 'xy_pad', 'spacing'] );
     }
 
     _computeAnimateDelay( i )
