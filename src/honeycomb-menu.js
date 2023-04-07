@@ -3,9 +3,9 @@ const _ = require('lodash');
 import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view, provideHass, lovelace_config } from "./helpers.js";
 
-
+const honeycomb_templates = lovelace_config().honeycomb_menu_templates || null;
 const hass = document.querySelector('home-assistant').hass;
 _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
@@ -69,14 +69,10 @@ function traverseConfigs( _config, _buttons )
     _config = _.merge({}, _config );
 
 
-    if( ! _config.template ||
-        ! cardTools.lovelace.config.honeycomb_menu_templates ||
-        ! cardTools.lovelace.config.honeycomb_menu_templates[_config.template]
-    ) {
+    if( ! _config.template || ! honeycomb_templates || ! honeycomb_templates[_config.template] )
         return Object.assign({}, _config, bindButtons( _config ));
-    }
 
-    let parentConfig = traverseConfigs( cardTools.lovelace.config.honeycomb_menu_templates[_config.template], _buttons );
+    let parentConfig = traverseConfigs( honeycomb_templates[_config.template], _buttons );
 
     // Delete the template property so the button doesn't hook into it
     delete _config.template;
@@ -91,11 +87,6 @@ hass.callService = function(domain, service, data, target)
     if( domain != 'honeycomb' )
         return hass._callService(domain, service, data, target);
 
-    if( typeof cardTools === 'undefined' )
-    {
-        console.error('Honeycomb Menu: Card Tools not loaded, if installed please hard refresh and clear browser cache otherwise please install card tools https://github.com/thomasloven/lovelace-card-tools');
-        return;
-    }
     var honeycombConfig = traverseConfigs( data );
 
     if( honeycombConfig.entity_id && ! honeycombConfig.entity )
@@ -104,7 +95,6 @@ hass.callService = function(domain, service, data, target)
     showHoneycombMenu(honeycombConfig);
 }
 
-customElements.whenDefined('card-tools').then(() => {
 class HoneycombMenu extends LitElement
 {
     static get is()
@@ -308,7 +298,7 @@ class HoneycombMenu extends LitElement
 
     setConfig( config )
     {
-        cardTools.provideHass(this);
+        provideHass(this);
 
         _.defaults(config, {
             action: 'hold',
@@ -535,4 +525,3 @@ class HoneycombMenu extends LitElement
     }
 }
 customElements.define(HoneycombMenu.is, HoneycombMenu);
-});

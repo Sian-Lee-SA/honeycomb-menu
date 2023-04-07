@@ -60,17 +60,17 @@ export function getTemplateOrValue(hass, state, custom_variables, value, _callba
     }
 };
 
-export function lovelace_view() {
-    var root = document.querySelector("hc-main");
-    if(root) {
-      root = root && root.shadowRoot;
-      root = root && root.querySelector("hc-lovelace");
-      root = root && root.shadowRoot;
-      root = root && root.querySelector("hui-view") || root.querySelector("hui-panel-view");
-      return root;
-    }
+export function provideHass(element) 
+{
+    if(document.querySelector('home-assistant'))
+        return document.querySelector("home-assistant").provideHass(element);
   
-    root = document.querySelector("home-assistant");
+    return undefined;
+}
+
+export function lovelace_view() 
+{
+    let root = document.querySelector("home-assistant");
     root = root && root.shadowRoot;
     root = root && root.querySelector("home-assistant-main");
     root = root && root.shadowRoot;
@@ -84,4 +84,80 @@ export function lovelace_view() {
     root = root && root.querySelector("#view");
     root = root && root.firstElementChild;
     return root;
-  }
+}
+
+export function lovelace_config() 
+{
+    let root = document.querySelector("home-assistant");
+    root = root && root.shadowRoot;
+    root = root && root.querySelector("home-assistant-main");
+    root = root && root.shadowRoot;
+    root = root && root.querySelector("app-drawer-layout partial-panel-resolver") || root.querySelector("ha-drawer partial-panel-resolver");
+    root = root && root.shadowRoot || root;
+    root = root && root.querySelector("ha-panel-lovelace")
+    root = root && root.shadowRoot;
+    root = root && root.querySelector("hui-root")
+    if (root) {
+        return root.lovelace.config || null;
+    }
+  
+    return null;
+}
+
+function _errorElement(error, origConfig) 
+{
+    const cfg = {
+        type: "error",
+        error,
+        origConfig
+    };
+
+    const el = document.createElement("hui-error-card");
+    customElements.whenDefined("hui-error-card").then(() => {
+        const newel = document.createElement("hui-error-card");
+        newel.setConfig(cfg);
+        if(el.parentElement)
+            el.parentElement.replaceChild(newel, el);
+    });
+    return el;
+}
+
+function _createElement(tag, config) 
+{
+    let el = document.createElement(tag);
+    try {
+        el.setConfig(JSON.parse(JSON.stringify(config)));
+    } catch (err) {
+        el = _errorElement(err, config);
+    }
+    return el;
+}
+
+export function createCard(config) 
+{
+    if( ! config || typeof config !== "object" || ! config.type )
+        return _errorElement(`No card type configured`, config);
+
+    let tag = config.type;
+    if(tag.startsWith('custom:'))
+        tag = tag.substr('custom:'.length);
+    else
+        tag = `hui-${tag}-card`;
+
+    if( customElements.get(tag) )
+        return _createElement(tag, config);
+
+    const el = _errorElement(`Custom element doesn't exist: ${tag}.`, config);
+    el.style.display = "None";
+
+    const timer = setTimeout(() => {
+        el.style.display = "";
+    }, 2000);
+
+    customElements.whenDefined(tag).then(() => {
+        clearTimeout(timer);
+        fireEvent("ll-rebuild", {}, el);
+    });
+
+    return el;
+}

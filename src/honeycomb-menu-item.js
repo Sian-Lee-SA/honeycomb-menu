@@ -1,7 +1,6 @@
 import { LitElement, html, css } from 'lit';
-import { objectEvalTemplate, getTemplateOrValue } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, provideHass, createCard } from "./helpers.js";
 
-const cardTools = customElements.get('card-tools');
 const _ = require('lodash');
 
 class HoneycombMenuItem extends LitElement
@@ -207,12 +206,12 @@ class HoneycombMenuItem extends LitElement
 
     _createLovelaceCard()
     {
-        var card = cardTools.createCard(_.merge({}, {
+        var card = createCard(_.merge({}, {    
             type: 'custom:button-card',
             size: '30px',
             show_name: false
         }, this.config));
-        cardTools.provideHass( card );
+        provideHass( card );
 
         card.addEventListener('action', e => {
             e.detail.item = this;

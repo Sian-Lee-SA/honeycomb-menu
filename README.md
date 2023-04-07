@@ -22,7 +22,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
 [![Youtube Video](https://img.youtube.com/vi/oJ9Yr2dSqUk/0.jpg)](https://www.youtube.com/watch?v=oJ9Yr2dSqUk)
 
 ## Requirements
-1. [Card Tools](https://github.com/thomasloven/lovelace-card-tools)
+1. [button-card](https://github.com/custom-cards/button-card)
 
 ## How to install
 1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
