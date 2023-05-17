@@ -1,9 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view, provideHass, lovelace_config } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view, provideHass, honeycomb_menu_templates } from "./helpers.js";
 
-const honeycomb_templates = lovelace_config().honeycomb_menu_templates || null;
 const hass = document.querySelector('home-assistant').hass;
 
 const merge = require('lodash/merge');
@@ -72,7 +71,7 @@ function traverseConfigs( _config, _buttons )
     // merge will also affect sub properties
     _config = merge({}, _config );
 
-
+    const honeycomb_templates = honeycomb_menu_templates();
     if( ! _config.template || ! honeycomb_templates || ! honeycomb_templates[_config.template] )
         return Object.assign({}, _config, bindButtons( _config ));
 
