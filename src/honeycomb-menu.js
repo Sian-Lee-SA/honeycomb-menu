@@ -199,7 +199,7 @@ class HoneycombMenu extends LitElement
 
             :host {
                 position: absolute;
-                z-index: 200;
+                z-index: 8; /*200;*/
             }
             :host([closing]), :host([closing]) * {
                 pointer-events: none !important;

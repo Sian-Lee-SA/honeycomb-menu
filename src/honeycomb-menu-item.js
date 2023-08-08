@@ -209,6 +209,14 @@ class HoneycombMenuItem extends LitElement
 
     _createLovelaceCard()
     {
+        if( ! this.config.type || this.config.type == 'custom:button-card' )
+            this.config.styles.card = [
+                { 
+                    height: '100%',
+                    position: 'fixed',
+                    padding: '0'
+                }
+            ]
         var card = createCard(merge({}, {    
             type: 'custom:button-card',
             size: '30px',
@@ -222,9 +230,11 @@ class HoneycombMenuItem extends LitElement
             e.detail.audio = this.config.audio;
         });
 
-        var sheet = new CSSStyleSheet();
-        sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; padding: 0 !important; }`);
-        card.shadowRoot.adoptedStyleSheets = [ ...card.shadowRoot.adoptedStyleSheets, sheet ];
+        // var sheet = new CSSStyleSheet();
+        // sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; padding: 0 !important; }`);
+        // card.render()
+        // console.dir(card);
+        // card.adoptedStyleSheets = [ ...card.adoptedStyleSheets, sheet ];
 
         return card;
     }

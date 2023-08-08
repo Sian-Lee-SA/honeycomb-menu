@@ -82,7 +82,7 @@ var nt,ot;class rt extends b{constructor(){super(...arguments),this.renderOption
                         <div id="item"></div>
                     </div>
                 </div>
-            </div>`}_computeIsActive(){this.config&&("boolean"==typeof this.config.active&&(this.active=this.config.active&&this.hass.states[this.config.entity]&&"on"==this.hass.states[this.config.entity].state),"string"==typeof this.config.active&&(this.active=ct(this.hass,this.hass.states[this.config.entity],this.config.variables,this.config.active)))}firstUpdated(){this.disabled||this.shadowRoot.querySelector("#item").append(this._createLovelaceCard())}_parseTemplates(){this.config.entity=ct(this.hass,null,this.config.variables,this.config.entity);for(let t in this.config)["tap_action","hold_action","double_tap_action"].indexOf(t)>-1&&(this.config[t]=at(this.hass,this.hass.states[this.config.entity],this.config.variables,this.config[t]))}_createLovelaceCard(){var t=pt(ft({},{type:"custom:button-card",size:"30px",show_name:!1},this.config));ut(t),t.addEventListener("action",t=>{t.detail.item=this,t.detail.autoclose=this.config.autoclose,t.detail.audio=this.config.audio});var e=new CSSStyleSheet;return e.replaceSync("ha-card { height: 100%; position: fixed !important; padding: 0 !important; }"),t.shadowRoot.adoptedStyleSheets=[...t.shadowRoot.adoptedStyleSheets,e],t}}customElements.define(mt.is,mt);const bt=n(62);class _t extends rt{static get is(){return"xy-pad"}static get properties(){return{hass:{type:Object},config:{type:Object},size:{type:Number},clampX:{type:Number},clampY:{type:Number},active:{type:Boolean,reflect:!0,attribute:!0},_current:{type:Object}}}static get styles(){return c`
+            </div>`}_computeIsActive(){this.config&&("boolean"==typeof this.config.active&&(this.active=this.config.active&&this.hass.states[this.config.entity]&&"on"==this.hass.states[this.config.entity].state),"string"==typeof this.config.active&&(this.active=ct(this.hass,this.hass.states[this.config.entity],this.config.variables,this.config.active)))}firstUpdated(){this.disabled||this.shadowRoot.querySelector("#item").append(this._createLovelaceCard())}_parseTemplates(){this.config.entity=ct(this.hass,null,this.config.variables,this.config.entity);for(let t in this.config)["tap_action","hold_action","double_tap_action"].indexOf(t)>-1&&(this.config[t]=at(this.hass,this.hass.states[this.config.entity],this.config.variables,this.config[t]))}_createLovelaceCard(){this.config.type&&"custom:button-card"!=this.config.type||(this.config.styles.card=[{height:"100%",position:"fixed",padding:"0"}]);var t=pt(ft({},{type:"custom:button-card",size:"30px",show_name:!1},this.config));return ut(t),t.addEventListener("action",t=>{t.detail.item=this,t.detail.autoclose=this.config.autoclose,t.detail.audio=this.config.audio}),t}}customElements.define(mt.is,mt);const bt=n(62);class _t extends rt{static get is(){return"xy-pad"}static get properties(){return{hass:{type:Object},config:{type:Object},size:{type:Number},clampX:{type:Number},clampY:{type:Number},active:{type:Boolean,reflect:!0,attribute:!0},_current:{type:Object}}}static get styles(){return c`
             :host {
                 position: absolute;
 
@@ -159,7 +159,7 @@ var nt,ot;class rt extends b{constructor(){super(...arguments),this.renderOption
 
             :host {
                 position: absolute;
-                z-index: 200;
+                z-index: 8; /*200;*/
             }
             :host([closing]), :host([closing]) * {
                 pointer-events: none !important;
