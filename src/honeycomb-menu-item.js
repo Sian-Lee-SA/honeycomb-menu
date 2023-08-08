@@ -210,13 +210,21 @@ class HoneycombMenuItem extends LitElement
     _createLovelaceCard()
     {
         if( ! this.config.type || this.config.type == 'custom:button-card' )
-            this.config.styles.card = [
+        {
+            if( ! this.config.styles )
+                this.config.styles = {}
+            if( ! Array.isArray(this.config.styles.card) )                
+                this.config.styles.card = [];
+            
+            this.config.styles.card.push(
                 { 
                     height: '100%',
                     position: 'fixed',
                     padding: '0'
                 }
-            ]
+            );
+        }
+
         var card = createCard(merge({}, {    
             type: 'custom:button-card',
             size: '30px',
