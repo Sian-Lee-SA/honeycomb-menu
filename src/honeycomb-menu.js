@@ -11,6 +11,7 @@ const split = require('lodash/split');
 const clamp = require('lodash/clamp');
 const _template = require('lodash/template');
 const isEmpty = require('lodash/isEmpty');
+const isString = require('lodash/isString');
 const _defaults = require('lodash/defaults');
 
 const manager = new function() {
@@ -90,6 +91,9 @@ hass.callService = function(domain, service, data, target)
     if( domain != 'honeycomb' )
         return hass._callService(domain, service, data, target);
 
+    if( isString( data ) )
+        data = JSON.parse(data);
+    
     var honeycombConfig = traverseConfigs( data );
 
     if( honeycombConfig.entity_id && ! honeycombConfig.entity )
@@ -377,7 +381,7 @@ class HoneycombMenu extends LitElement
                 {
                     b.show = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, b.show )
                 } else if( b != 'break' && b != 'skip') {
-                     b.show = true;
+                    b.show = true;
                 }
 
                 if( b != 'break' && (! b.show || b == 'skip') )

@@ -197,14 +197,20 @@ class HoneycombMenuItem extends LitElement
     _parseTemplates()
     {
         this.config.entity = getTemplateOrValue( this.hass, null, this.config.variables, this.config.entity );
-
         for( let key in this.config )
         {
-            if( ['tap_action', 'hold_action', 'double_tap_action'].indexOf(key) > -1 )
+            if( ['tap_action', 'hold_action', 'double_tap_action'].indexOf(key) > -1)
             {
-                this.config[key] = objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config[key] );
+                if( this.config[key].service == 'honeycomb' )
+                {
+                    this.config[key].service_data = JSON.stringify(this.config[key].service_data);
+                } else {
+                    this.config[key] = objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config[key] );
+                }
             }
         }
+        
+        
     }
 
     _createLovelaceCard()
@@ -238,11 +244,10 @@ class HoneycombMenuItem extends LitElement
             e.detail.audio = this.config.audio;
         });
 
+        // Button Card 4.0.0 no longer has shadowRoot available before render so we inject the styles above
         // var sheet = new CSSStyleSheet();
         // sheet.replaceSync( `ha-card { height: 100%; position: fixed !important; padding: 0 !important; }`);
-        // card.render()
-        // console.dir(card);
-        // card.adoptedStyleSheets = [ ...card.adoptedStyleSheets, sheet ];
+        // card.shadowRoot.adoptedStyleSheets = [ ...card.shadowRoot.adoptedStyleSheets, sheet ];
 
         return card;
     }
