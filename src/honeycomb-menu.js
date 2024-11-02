@@ -503,7 +503,7 @@ class HoneycombMenu extends LitElement
         if( ! data )
             return new Object();
 
-        return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], {}, data, (val) => {
+        return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, data, (val) => {
             if( val == 'entity' )
                 return this.config.entity;
             return _template(val, {interpolate: /{{([\s\S]+?)}}/g})(vars);
