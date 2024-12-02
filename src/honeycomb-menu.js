@@ -91,8 +91,8 @@ hass.callService = function(domain, service, data, target)
     if( domain != 'honeycomb' )
         return hass._callService(domain, service, data, target);
 
-    if( isString( data ) )
-        data = JSON.parse(data);
+    if( isString( data.xy_pad ) )
+        data.xy_pad = JSON.parse(data.xy_pad);
     
     var honeycombConfig = traverseConfigs( data );
 
