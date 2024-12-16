@@ -53,8 +53,11 @@ export function getTemplateOrValue(hass, state, custom_variables, value, _callba
         value = _callback( value );
 
     const trimmed = value.trim();
+
     if (trimmed.substring(0, 3) === '[[[' && trimmed.slice(-3) === ']]]') {
         return evalTemplate(hass, state, custom_variables, trimmed.slice(3, -3));
+    } else if(trimmed.substring(0, 5) === 'HCJS:') {
+        return evalTemplate(hass, state, custom_variables, trimmed.slice(5));
     } else {
         return value;
     }
