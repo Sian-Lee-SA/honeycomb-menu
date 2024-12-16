@@ -29,6 +29,17 @@ const manager = new function() {
 document.addEventListener('touchstart', manager.handleXYPosition, false);
 document.addEventListener('mousedown', manager.handleXYPosition, false);
 
+document.body.addEventListener("ll-custom", e => {
+    if(e.detail.honeycomb_menu)
+    {
+        var honeycombConfig = traverseConfigs( e.detail.honeycomb_menu );
+
+        if( honeycombConfig.entity_id && ! honeycombConfig.entity )
+            honeycombConfig.entity = honeycombConfig.entity_id;
+        showHoneycombMenu( honeycombConfig );
+    }
+});
+
 function showHoneycombMenu( _config )
 {
     // Remove any lingering honeycom menus as there should only be one active at a time
@@ -503,9 +514,10 @@ class HoneycombMenu extends LitElement
         if( ! data )
             return new Object();
 
-        return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, data, (val) => {
+        return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], { ...this.config.variables, ...vars }, data, (val) => {
             if( val == 'entity' )
                 return this.config.entity;
+            return val;
             return _template(val, {interpolate: /{{([\s\S]+?)}}/g})(vars);
         });
     }
