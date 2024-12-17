@@ -1,3 +1,5 @@
+const isString = require('lodash/isString');
+
 export function fireEvent( _node, _event, _detail = {}, _options = {})
 {
     const event = new Event( _event, Object.assign({
@@ -62,12 +64,18 @@ export function getTemplateOrValue(hass, state, custom_variables, value, _callba
     } else if(trimmed.substring(0, 5) === 'HCJS:') {
         return evalTemplate(hass, state, custom_variables, trimmed.slice(5));
     } else {
-        let result = evalTemplate(hass, state, custom_variables, trimmed, true);
-        if( ! result || result == 'undefined' ||  result == 'false' )
-            return false;
-        return result;
+        return evalTemplate(hass, state, custom_variables, trimmed, true);
     }
 };
+
+export function stringToBool( value )
+{
+    if( ! isString(value) )
+        return value;
+
+    value = value.trim();
+    return !(! value ||  ['undefined', 'false', '0'].includes(value) );
+}
 
 export function provideHass(element) 
 {

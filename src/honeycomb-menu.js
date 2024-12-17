@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import "./honeycomb-menu-item.js";
 import "./xy-pad.js";
-import { objectEvalTemplate, getTemplateOrValue, fireEvent, lovelace_view, provideHass, honeycomb_menu_templates } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, stringToBool, fireEvent, lovelace_view, provideHass, honeycomb_menu_templates } from "./helpers.js";
 
 const hass = document.querySelector('home-assistant').hass;
 
@@ -11,7 +11,6 @@ const split = require('lodash/split');
 const clamp = require('lodash/clamp');
 const _template = require('lodash/template');
 const isEmpty = require('lodash/isEmpty');
-const isString = require('lodash/isString');
 const _defaults = require('lodash/defaults');
 
 const manager = new function() {
@@ -400,7 +399,7 @@ class HoneycombMenu extends LitElement
 			{
 				if( b.show !== undefined )
                 {
-                    b.show = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, b.show )
+                    b.show = stringToBool( getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, b.show ) );
                 } else if( b != 'break' && b != 'skip') {
                     b.show = true;
                 }

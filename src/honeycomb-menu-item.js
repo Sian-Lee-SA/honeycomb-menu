@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { objectEvalTemplate, getTemplateOrValue, provideHass, createCard } from "./helpers.js";
+import { objectEvalTemplate, getTemplateOrValue, stringToBool, provideHass, createCard } from "./helpers.js";
 
 const merge = require('lodash/merge');
 const assign = require('lodash/assign');
@@ -184,7 +184,7 @@ class HoneycombMenuItem extends LitElement
         }
         if( typeof this.config.active == 'string' )
         {
-            this.active = getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config.active);
+            this.active = stringToBool( getTemplateOrValue( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config.active) );
         }
     }
 
