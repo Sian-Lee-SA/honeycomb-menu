@@ -102,8 +102,8 @@ hass.callService = function(domain, service, data, target)
     if( domain != 'honeycomb' )
         return hass._callService(domain, service, data, target);
 
-    if( isString( data.xy_pad ) )
-        data.xy_pad = JSON.parse(data.xy_pad);
+//    if( isString( data.xy_pad ) )
+//        data.xy_pad = JSON.parse(data.xy_pad);
     
     var honeycombConfig = traverseConfigs( data );
 
@@ -335,6 +335,16 @@ class HoneycombMenu extends LitElement
             containerHeight: itemSize * 2.9
         };
 
+        if( this.config.xy_pad )
+        {
+            if( this.config.xy_pad["x"] ) {
+                this.config.xy_pad["x"].data = this.config.xy_pad["x"].data || this.config.xy_pad["x"].service_data;
+            }
+            if( this.config.xy_pad["y"] ) {
+                this.config.xy_pad["y"].data = this.config.xy_pad["y"].data || this.config.xy_pad["y"].service_data;
+            }
+        }
+
         this._assignButtons();        
     }
 
@@ -503,7 +513,7 @@ class HoneycombMenu extends LitElement
             this._service[axis] = true;
             let service = split( config.service, '.', 2);
             this.hass
-                .callService( service[0], service[1], this.__renderServiceData(e.detail, config.service_data) )
+                .callService( service[0], service[1], this.__renderServiceData(e.detail, config.data) )
                 .then(e => this._service[axis] = false);
 
         });
@@ -517,7 +527,6 @@ class HoneycombMenu extends LitElement
         return objectEvalTemplate( this.hass, this.hass.states[this.config.entity], { ...this.config.variables, ...vars }, data, (val) => {
             if( val == 'entity' )
                 return this.config.entity;
-            return val;
             return _template(val, {interpolate: /{{([\s\S]+?)}}/g})(vars);
         });
     }
