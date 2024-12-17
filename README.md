@@ -44,7 +44,7 @@ The module uses a hierarchy override for honeycomb options and sub options so yo
         1. Ensure Resource type is left as Javascript Module
 
 ## How to use
-call-service action, you can call the honeycomb service while passing the config options as the service data without the need for the action option. Any card or module that uses the hass.callService can invoke the honeycomb menu
+fire-dom-event action, you can call the honeycomb menu while passing the config options to the property honeycomb_menu.
 
 ```yaml
 - type: vertical-stack
@@ -52,9 +52,8 @@ call-service action, you can call the honeycomb service while passing the config
   - type: button
     entity: light.kitchen
     hold_action:
-      action: call-service
-      service: honeycomb
-      service_data:
+      action: fire-dom-event
+      honeycomb_menu:
         template: light
         autoclose: false
         active: true
@@ -112,7 +111,7 @@ Option          | Values        | Default   | Details
 --              | -             | -         | -
 invert | `true \| false` | `false` | x or y will swap negative and positive values so moving xy pin up will give a positive value whereas down will give a negative value
 service | `any:service` | `null` | The service to call eg. light.turn_on. If this value is omitted then the ball pin will have no effect on this axis
-service_data | `dict` | `null` | Provide any service data as a dictionary / object. This property will be processed through the template system allowing access to variables and javascript. See [Templating](#templating).
+data or service_data | `dict` | `null` | Provide any service data as a dictionary / object. This property will be processed through the template system allowing access to variables and javascript. See [Templating](#templating).
 
 ## Theme Styles and Defaults
 
@@ -129,94 +128,85 @@ styles {
 ```
 
 ## Templating
-Templating is currently available for all `XYConfig:service_data` properties and some config options. Templating allows flexibility and provide values based on the xy pads positions or config options.
+`HCJS:` (aka HoneyComb JavaScript) must be declared at the start to signal that the string is to be run as javascript (remember to return your values!). Configs with variables defined can be accessed by the `variables` object along with the xypad data if using the feature.
+
+Templating is currently available for all `XYConfig:data` properties and some config options. Templating allows flexibility and provide values based on the xy pads positions or config options.
 
 A property only containing the word **entity** will be converted to the `honeycomb:entity` value.
 
-There are two templating syntax's
-1. Uses `{{ variable }}` syntax to retrieve the xy pad event variables. These variables come with either a negative or positive values depending on direction from center. * Does not apply to `active` option
-        Available variables are:
+The xypad will pass the following into the variable `variables`
 
         x: Pixels from the x center position
         y: Pixels from the y center position
-        x_percentage: Percentage of the x position
-        y_percentage: Percentage of the y position
-
-1. Uses a modified version of [button-card](https://github.com/custom-cards/button-card) by [@RomRider](https://github.com/RomRider) templating system using the `[[[ return 'some_value' ]]]` syntax (remember to return your values!). Head over to [button-card templates](https://github.com/custom-cards/button-card#templates) for an insight to how this templating system works. Configs with variables defined can be accessed by the `variables` object.
-
-The first template syntax `{{ }}` will be parsed first allowing the [button-card templates](https://github.com/custom-cards/button-card#templates) syntax `[[[  ]]]` parser to work with the actual values from the xy pad. eg.
+        x_percentage: Percentage of the x position (-10 to 10)
+        y_percentage: Percentage of the y position (-10 to 10)
 
 ```javascript
-[[[ return {{ x_percentage }} / 10; ]]]
+HCJS: return variables.x_percentage / 10;
 ```
-_becomes_:
+Keep in mind that some service data requires an int and you maybe sending a float, you will need to convert to an int if required.
 
-```javascript
-[[[ return 50 / 10; ]]]
-```
-> the second parser would then give the value of `5` based on the example above and `x_percentage = 50`
 #### Examples
-It's also possible to just use the first parser or second parser without the other. The following example with result in the `service_data:brightness` value to be the actual percentage of the xy pin `x` or `y` value:
 
 > Note: the following service `light.relative_brightnesss` is not a part of Home Assistant but instead is my own custom service that changes a lights brightness relatively. You could achieve the same outcome with the `light.turn_on` service and using the javascript template parser with some calculations
 
 ```yaml
 ...
-service: honeycomb
-service_data:
+action: fire-dom-event
+honeycomb_menu:
   entity: light.kitchen
   xy_pad:
     x:
       invert: true
       service: light.relative_color
-      service_data:
+      data:
         # The word entity will become light.kitchen
         entity_id: entity
-        hue: '[[[ return {{ y }} / 18 * {{ y_percentage }}; ]]]'        
+        hue: 'HCJS: return variables.y / 18 * variables.y_percentage;'        
     y:
       service: light.relative_brightnesss
-      service_data:
+      data:
         # We can define another entity like normal
         entity_id: light.bathroom
-        brightness: '{{ x_percentage }}'
+        brightness: 'HCJS: return variables.x_percentage;'
         percentage: true
 ```
 
 An example for templatable config options could be used to determine a fan state and set the button as active if fan is currently in that state eg...
-
+As by default honeycomb menu items uses custom:buton-card for buttons, you can default to their JS syntax or use HCJS:
 ```yaml
 ...
-service: honeycomb
-service_data:
-    entity: fan.master_bedroom
-    buttons:
-      - icon: 'mdi:information-variant'
-        tap_action:
-          action: more-info
-      - icon: 'mdi:fan-speed-1'
-        active: '[[[ return entity.attributes.speed == "low" ]]]'
-        tap_action:
-          action: call-service
-          service: fan.set_speed
-          service_data:
-            entity_id: entity
-            speed: low
-      - icon: 'mdi:fan-speed-2'
-        active: '[[[ return entity.attributes.speed == "medium" ]]]'
-        tap_action:
-          action: call-service
-          service: fan.set_speed
-          service_data:
-            entity_id: entity
-            speed: medium
-      - icon: 'mdi:fan-speed-3'
-        active: '[[[ return entity.attributes.speed == "high" ]]]'
-        tap_action:
-          action: call-service
-          service: fan.set_speed
-          service_data:
-            entity_id: entity
-            speed: high
+action: fire-dom-event
+honeycomb_menu:
+  entity: fan.master_bedroom
+  buttons:
+    - icon: 'mdi:information-variant'
+      tap_action:
+        action: more-info
+    - icon: 'mdi:fan-speed-1'
+      active: '[[[ return entity.attributes.speed == "low" ]]]'
+      tap_action:
+        action: call-service
+        service: fan.set_speed
+        service_data:
+          entity_id: entity
+          speed: low
+    - icon: 'mdi:fan-speed-2'
+      active: '[[[ return entity.attributes.speed == "medium" ]]]'
+      tap_action:
+        action: call-service
+        service: fan.set_speed
+        service_data:
+          entity_id: entity
+          speed: medium
+    - icon: 'mdi:fan-speed-3'
+      active: '[[[ return entity.attributes.speed == "high" ]]]'
+      tap_action:
+        action: call-service
+        service: fan.set_speed
+        service_data:
+          entity_id: entity
+          speed: high
 ```
 
 #### Example using variables
@@ -234,24 +224,24 @@ light:
     y:
       invert: true
       service: light.turn_on
-      service_data:
+      data:
         entity_id: entity
-        brightness_step_pct: '[[[ return {{ y_percentage }} / 10; ]]]'
+        brightness_step_pct: 'HCJS: return variables.y_percentage / 10;'
   buttons:
     - icon: 'mdi:information-variant'
       tap_action:
         action: more-info
     - icon: 'mdi:lightbulb'
       active: true
-    - show: '[[[ return (variables.motion) ]]]'
-      entity: '[[[ return variables.motion ]]]'
+    - show: 'HCJS: return (variables.motion);'
+      entity: 'HCJS: return variables.motion;'
       icon: 'mdi:motion-sensor'
       position: 4
       active: true
       tap_action:
         action: toggle
-    - show: '[[[ return (variables.timer) ]]]'
-      entity: '[[[ return variables.timer ]]]'
+    - show: 'HCJS: return (variables.timer);'
+      entity: 'HCJS: return variables.timer;'
       icon: 'mdi:timer'
       position: 5
       active: true
@@ -266,9 +256,8 @@ Below is an example on how to assign a menu to the above example.
 - type: 'custom:button-card'
   entity: light.back_yard_garden_leds
   hold_action:
-    action: call-service
-    service: honeycomb
-    service_data:
+    action: fire-dom-event
+    honeycomb_menu:
       template: light
       variables:
         motion: automation.motion_back_yard_garden_leds
