@@ -16,7 +16,7 @@ export function fireEvent( _node, _event, _detail = {}, _options = {})
 export function evalTemplate(hass, state, custom_variables, func, template_literals = false)
 {
     if( template_literals )
-        func = `return \`${func}\``;
+        func = `return \`${func}\`;`;
 
     try {
         return new Function('states', 'entity', 'variables', 'user', 'hass', `'use strict'; ${func}`).call(
@@ -62,7 +62,10 @@ export function getTemplateOrValue(hass, state, custom_variables, value, _callba
     } else if(trimmed.substring(0, 5) === 'HCJS:') {
         return evalTemplate(hass, state, custom_variables, trimmed.slice(5));
     } else {
-        return evalTemplate(hass, state, custom_variables, trimmed, true);
+        let result = evalTemplate(hass, state, custom_variables, trimmed, true);
+        if( ! result || result == 'undefined' ||  result == 'false' )
+            return false;
+        return result;
     }
 };
 
