@@ -128,7 +128,7 @@ styles {
 ```
 
 ## Templating
-`HCJS:` (aka HoneyComb JavaScript) must be declared at the start to signal that the string is to be run as javascript (remember to return your values!). Configs with variables defined can be accessed by the `variables` object along with the xypad data if using the feature.
+All templatable properties will be parsed as [Template Literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), if you need full Javascript functionalities then `HCJS:` (aka HoneyComb JavaScript) must be declared at the start to signal that the string is to be run as javascript (remember to return your values!). Configs with variables defined can be accessed by the `variables` object along with the xypad data if using the feature.
 
 Templating is currently available for all `XYConfig:data` properties and some config options. Templating allows flexibility and provide values based on the xy pads positions or config options.
 
@@ -143,6 +143,10 @@ The xypad will pass the following into the variable object `variables`
 
 ```javascript
 HCJS: return variables.x_percentage / 10;
+```
+or via Template Literals (does not need to be returned)
+```javascript
+${variables.x_percentage / 10}
 ```
 Keep in mind that some service data requires an int and you maybe sending a float, you will need to convert to an int if required.
 
@@ -162,13 +166,13 @@ honeycomb_menu:
       data:
         # The word entity will become light.kitchen
         entity_id: entity
-        hue: 'HCJS: return variables.x / 18 * variables.x_percentage;'        
+        hue: '${variables.x / 18 * variables.x_percentage}'        
     y:
       service: light.relative_brightnesss
       data:
         # We can define another entity like normal
         entity_id: light.bathroom
-        brightness: 'HCJS: return variables.y_percentage;'
+        brightness: '${variables.y_percentage}'
         percentage: true
 ```
 
@@ -226,22 +230,22 @@ light:
       service: light.turn_on
       data:
         entity_id: entity
-        brightness_step_pct: 'HCJS: return variables.y_percentage / 10;'
+        brightness_step_pct: 'HCJS: return variables.y_percentage / 10;' # or '${variables.y_percentage / 10}'
   buttons:
     - icon: 'mdi:information-variant'
       tap_action:
         action: more-info
     - icon: 'mdi:lightbulb'
       active: true
-    - show: 'HCJS: return (variables.motion);'
-      entity: 'HCJS: return variables.motion;'
+    - show: 'HCJS: return (variables.motion);' # or '${(variables.motion)}'
+      entity: 'HCJS: return variables.motion;' # or '${variables.motion}'
       icon: 'mdi:motion-sensor'
       position: 4
       active: true
       tap_action:
         action: toggle
-    - show: 'HCJS: return (variables.timer);'
-      entity: 'HCJS: return variables.timer;'
+    - show: 'HCJS: return (variables.timer);' # or '${(variables.timer)}'
+      entity: 'HCJS: return variables.timer;' # or '${variables.timer}'
       icon: 'mdi:timer'
       position: 5
       active: true

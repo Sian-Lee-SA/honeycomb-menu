@@ -13,8 +13,11 @@ export function fireEvent( _node, _event, _detail = {}, _options = {})
     return event;
 };
 
-export function evalTemplate(hass, state, custom_variables, func)
+export function evalTemplate(hass, state, custom_variables, func, template_literals = false)
 {
+    if( template_literals )
+        func = `return \`${func}\``;
+
     try {
         return new Function('states', 'entity', 'variables', 'user', 'hass', `'use strict'; ${func}`).call(
             this,
@@ -59,7 +62,7 @@ export function getTemplateOrValue(hass, state, custom_variables, value, _callba
     } else if(trimmed.substring(0, 5) === 'HCJS:') {
         return evalTemplate(hass, state, custom_variables, trimmed.slice(5));
     } else {
-        return value;
+        return evalTemplate(hass, state, custom_variables, trimmed, true);
     }
 };
 
