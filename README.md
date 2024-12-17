@@ -134,7 +134,7 @@ Templating is currently available for all `XYConfig:data` properties and some co
 
 A property only containing the word **entity** will be converted to the `honeycomb:entity` value.
 
-The xypad will pass the following into the variable `variables`
+The xypad will pass the following into the variable object `variables`
 
         x: Pixels from the x center position
         y: Pixels from the y center position
@@ -162,13 +162,13 @@ honeycomb_menu:
       data:
         # The word entity will become light.kitchen
         entity_id: entity
-        hue: 'HCJS: return variables.y / 18 * variables.y_percentage;'        
+        hue: 'HCJS: return variables.x / 18 * variables.x_percentage;'        
     y:
       service: light.relative_brightnesss
       data:
         # We can define another entity like normal
         entity_id: light.bathroom
-        brightness: 'HCJS: return variables.x_percentage;'
+        brightness: 'HCJS: return variables.y_percentage;'
         percentage: true
 ```
 
