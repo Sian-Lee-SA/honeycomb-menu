@@ -237,14 +237,14 @@ light:
         action: more-info
     - icon: 'mdi:lightbulb'
       active: true
-    - show: 'HCJS: return (variables.motion);' # or '${(variables.motion)}'
+    - show: 'HCJS: return (variables.motion);' # or '${variables.motion}'
       entity: 'HCJS: return variables.motion;' # or '${variables.motion}'
       icon: 'mdi:motion-sensor'
       position: 4
       active: true
       tap_action:
         action: toggle
-    - show: 'HCJS: return (variables.timer);' # or '${(variables.timer)}'
+    - show: 'HCJS: return (variables.timer);' # or '${variables.timer}'
       entity: 'HCJS: return variables.timer;' # or '${variables.timer}'
       icon: 'mdi:timer'
       position: 5
