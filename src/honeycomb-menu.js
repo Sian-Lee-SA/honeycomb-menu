@@ -27,6 +27,14 @@ const manager = new function() {
 
 if (!window.honeycomb_menu)
 {
+    window.honeycomb_menu = function(config) {
+        var honeycombConfig = traverseConfigs( config );
+
+        if( honeycombConfig.entity_id && ! honeycombConfig.entity )
+            honeycombConfig.entity = honeycombConfig.entity_id;
+        showHoneycombMenu( honeycombConfig );
+    };
+
     document.addEventListener('touchstart', manager.handleXYPosition, false);
     document.addEventListener('mousedown', manager.handleXYPosition, false);
     // document.addEventListener("mousemove", manager.handleXYPosition, false);
@@ -34,14 +42,9 @@ if (!window.honeycomb_menu)
     document.body.addEventListener("ll-custom", e => {
         if(e.detail.honeycomb_menu)
         {
-            var honeycombConfig = traverseConfigs( e.detail.honeycomb_menu );
-
-            if( honeycombConfig.entity_id && ! honeycombConfig.entity )
-                honeycombConfig.entity = honeycombConfig.entity_id;
-            showHoneycombMenu( honeycombConfig );
+            window.honeycomb_menu( e.detail.honeycomb_menu );
         }
     });
-    window.honeycomb_menu = manager;
 }
 
 function showHoneycombMenu( _config )
@@ -471,7 +474,7 @@ class HoneycombMenu extends LitElement
 
     _handleShadeClick(e)
     {
-        e.cancelBubble = true;
+        e.stopPropagation();
         this.close();
     }
 

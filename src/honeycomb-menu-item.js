@@ -201,11 +201,6 @@ class HoneycombMenuItem extends LitElement
         {
             if( ['tap_action', 'hold_action', 'double_tap_action'].indexOf(key) > -1)
             {
-                /*if( this.config[key].service == 'honeycomb' )
-                {
-                    if( this.config[key].service_data.xy_pad )
-                        this.config[key].service_data.xy_pad = JSON.stringify(this.config[key].service_data.xy_pad);
-                }*/
                 this.config[key] = objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config[key] );
             }
         }
