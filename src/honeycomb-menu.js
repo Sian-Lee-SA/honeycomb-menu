@@ -25,27 +25,24 @@ const manager = new function() {
     }.bind(this);
 };
 
-if (!window.honeycomb_menu)
-{
-    window.honeycomb_menu = function(config) {
-        var honeycombConfig = traverseConfigs( config );
+window.honeycomb_menu = (config) => {
+    var honeycombConfig = traverseConfigs( config );
 
-        if( honeycombConfig.entity_id && ! honeycombConfig.entity )
-            honeycombConfig.entity = honeycombConfig.entity_id;
-        showHoneycombMenu( honeycombConfig );
-    };
+    if( honeycombConfig.entity_id && ! honeycombConfig.entity )
+        honeycombConfig.entity = honeycombConfig.entity_id;
+    showHoneycombMenu( honeycombConfig );
+};
 
-    document.addEventListener('touchstart', manager.handleXYPosition, false);
-    document.addEventListener('mousedown', manager.handleXYPosition, false);
-    // document.addEventListener("mousemove", manager.handleXYPosition, false);
+document.addEventListener('touchstart', manager.handleXYPosition, false);
+document.addEventListener('mousedown', manager.handleXYPosition, false);
+// document.addEventListener("mousemove", manager.handleXYPosition, false);
 
-    document.body.addEventListener("ll-custom", e => {
-        if(e.detail.honeycomb_menu)
-        {
-            window.honeycomb_menu( e.detail.honeycomb_menu );
-        }
-    });
-}
+document.body.addEventListener("ll-custom", e => {
+    if(e.detail.honeycomb_menu)
+    {
+        window.honeycomb_menu( e.detail.honeycomb_menu );
+    }
+});
 
 function showHoneycombMenu( _config )
 {
@@ -105,19 +102,9 @@ function traverseConfigs( _config, _buttons )
 hass._callService = hass.callService
 hass.callService = function(domain, service, data, target)
 {
-    
     if( domain != 'honeycomb' )
         return hass._callService(domain, service, data, target);
-
-//    if( isString( data.xy_pad ) )
-//        data.xy_pad = JSON.parse(data.xy_pad);
-    
-    var honeycombConfig = traverseConfigs( data );
-
-    if( honeycombConfig.entity_id && ! honeycombConfig.entity )
-        honeycombConfig.entity = honeycombConfig.entity_id;
-
-    showHoneycombMenu(honeycombConfig);
+    window.honeycomb_menu(data);
 }
 
 class HoneycombMenu extends LitElement
