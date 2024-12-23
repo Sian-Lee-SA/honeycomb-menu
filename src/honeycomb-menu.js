@@ -314,6 +314,7 @@ class HoneycombMenu extends LitElement
             entity: null,
             active: false,
             autoclose: true,
+            audio: false,
             variables: {},
             size: 225,
             spacing: 2,
