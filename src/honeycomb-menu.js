@@ -11,6 +11,7 @@ const split = require('lodash/split');
 const clamp = require('lodash/clamp');
 const _template = require('lodash/template');
 const isEmpty = require('lodash/isEmpty');
+const isString = require('lodash/isString');
 const _defaults = require('lodash/defaults');
 
 const manager = new function() {
@@ -30,6 +31,8 @@ window.honeycomb_menu = (config) => {
 
     if( honeycombConfig.entity_id && ! honeycombConfig.entity )
         honeycombConfig.entity = honeycombConfig.entity_id;
+
+    // console.dir(honeycombConfig);
     showHoneycombMenu( honeycombConfig );
 };
 
@@ -479,7 +482,7 @@ class HoneycombMenu extends LitElement
 
     _playButtonSound( _item )
     {
-        if( ! _item.config.audio )
+        if( ! isString(_item.config.audio) )
             return;
 
         let audio_ele = document.querySelector('#honeycomb-audio');

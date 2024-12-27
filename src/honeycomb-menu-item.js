@@ -78,7 +78,7 @@ class HoneycombMenuItem extends LitElement
         // Assign Defaults
         this._config = assign({
             autoclose: true,
-            audio: true,
+            audio: false,
             active: false,
             variables: {},
         }, config);
@@ -201,6 +201,12 @@ class HoneycombMenuItem extends LitElement
         {
             if( ['tap_action', 'hold_action', 'double_tap_action'].indexOf(key) > -1)
             {
+                if( 'honeycomb_menu' in this.config[key] )
+                {
+                    if( this.config.variables )
+                        this.config[key].honeycomb_menu.variables = { ...this.config.variables, ...this.config[key].honeycomb_menu.variables };
+                    continue;
+                }
                 this.config[key] = objectEvalTemplate( this.hass, this.hass.states[this.config.entity], this.config.variables, this.config[key] );
             }
         }
