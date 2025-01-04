@@ -1,7 +1,7 @@
 {
     "name": "honeycomb-menu",
     "private": true,
-    "version": "0.14.6",
+    "version": "0.14.7",
     "description": "Display a popup menu for Home Assistant lovelace cards via tap, hold or double tap",
     "scripts": {
         "build": "webpack",
