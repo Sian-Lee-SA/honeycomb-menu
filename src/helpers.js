@@ -99,7 +99,7 @@ export function lovelace_view()
     root = root && root.shadowRoot;
     root = root && root.querySelector("ha-app-layout") || root;
     root = root && root.querySelector("#view");
-    root = root && root.firstElementChild;
+    root = root && root.querySelector("hui-view");
     return root;
 }
 
@@ -111,9 +111,9 @@ export function lovelace_config()
     root = root && root.shadowRoot;
     root = root && root.querySelector("app-drawer-layout partial-panel-resolver") || root.querySelector("ha-drawer partial-panel-resolver");
     root = root && root.shadowRoot || root;
-    root = root && root.querySelector("ha-panel-lovelace")
+    root = root && root.querySelector("ha-panel-lovelace");
     root = root && root.shadowRoot;
-    root = root && root.querySelector("hui-root")
+    root = root && root.querySelector("hui-root");
     if (root) {
         return root.lovelace.config || null;
     }
