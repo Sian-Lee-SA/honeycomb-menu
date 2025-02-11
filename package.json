@@ -14,7 +14,7 @@
     "author": "Sian Croser",
     "license": "GPLv3",
     "devDependencies": {
-        "webpack": "^4.42.0",
+        "webpack": "^5.97.1",
         "webpack-cli": "^3.3.11"
     },
     "dependencies": {
