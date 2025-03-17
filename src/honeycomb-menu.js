@@ -102,14 +102,6 @@ function traverseConfigs( _config, _buttons )
     return Object.assign({}, parentConfig, _config, bindButtons( _config ));
 }
 
-hass._callService = hass.callService
-hass.callService = function(domain, service, data, target)
-{
-    if( domain != 'honeycomb' )
-        return hass._callService(domain, service, data, target);
-    window.honeycomb_menu(data);
-}
-
 class HoneycombMenu extends LitElement
 {
     static get is()
