@@ -1,6 +1,6 @@
 {
-  "name": "Honeycomb Menu",
+  "name": "Honeycomb Menu NG",
   "content_in_root": true,
-  "filename": "honeycomb-menu.js",
+  "filename": "honeycomb-menu-ng.js",
   "render_readme": true
 }

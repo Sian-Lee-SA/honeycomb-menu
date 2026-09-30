@@ -1,228 +1,452 @@
-# Honeycomb-Menu for Home Assistant by [@Sian-Lee-SA](http://github.com/Sian-Lee-SA)
+<p align="center">
+  <img src="assets/honeycomb-menu-ng-logo.png" width="220" alt="Honeycomb Menu NG">
+</p>
+# Honeycomb Menu NG for Home Assistant
 
+Enhanced fork of [Sian-Lee-SA/honeycomb-menu](https://github.com/Sian-Lee-SA/honeycomb-menu) with flexible 18-slot layouts, an optional center button, shared styling, nested menus, and soft/hard slot positioning.
 
-<a href="https://www.paypal.com/donate/?business=A82MM255CXF9L&no_recurring=0&item_name=Donating+will+help+justify+my+time+coding+and+doing+projects+that+also+benifits+others.+Any+amount+is+greatly+appreciated%21&currency_code=AUD"><img src="https://github.com/andreostrovsky/donate-with-paypal/raw/master/blue.svg" height="38"></a>
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/SianLee)
+Honeycomb Menu NG is a **Home Assistant dashboard module**, not a standalone card. It can be attached to Lovelace cards through `fire-dom-event` and opens a floating menu made from hexagonal buttons.
 
-Check out the great guide [Honeycomb Module: Hex PopUp Menu For Home Assistant](https://smarthomescene.com/guides/honeycomb-module-hex-popup-menu-for-home-assistant/)
+> Current NG features are focused on flexible layouts, styling and menu interaction while keeping backwards compatibility with existing Honeycomb Menu YAML where possible.
 
-## About
+## Highlights
 
-Honeycomb menu is a [Home Assistant](https://www.home-assistant.io/) module (not a card) that can be applied to any lovelace card. When activated by the defined action on said card, the module will display a 'rounded' list of honeycomb buttons with an optional XY pad to make interfacing with lovelace more fluent. This module was designed with [button-card](https://github.com/custom-cards/button-card) by [@RomRider](https://github.com/RomRider) in mind.
-
-The module uses a hierarchy override for honeycomb options and sub options so you can define a templated version of options then define another set of options that will merge / cascade.
-
-> This is still in alpha stages and has only be used and tested in chrome. Please expect errors and bugs otherwise you will be overly frustrated & disappointed!
-
-![Example of Honeycomb](examples/example-1.gif)
-![Example of XYPad](examples/example-xypad.gif)
-
-## Watch YouTube Demonstration
-
-[![Youtube Video](https://img.youtube.com/vi/oJ9Yr2dSqUk/0.jpg)](https://www.youtube.com/watch?v=oJ9Yr2dSqUk)
+- Up to **18 ring buttons** plus an optional center button
+- **6-slot inner ring** and **12-slot outer ring**
+- Automatic ring selection based on button count
+- Soft and hard slot positioning
+- Automatic center button using the Honeycomb entity
+- Configurable center-button contrast with `center_brightness`
+- Global `button_defaults` styling
+- `empty_slots: visible|hidden`
+- Nested Honeycomb menus
+- Existing template and XY-pad support
+- Legacy `position` support
 
 ## Requirements
-1. [button-card](https://github.com/custom-cards/button-card)
 
-## How to install
-1. Download the [module](https://github.com/Sian-Lee-SA/honeycomb-menu/releases)
-1. Place the file into the `config/www` path of your home assistant installation
-    > you can place into a sub directory if you have OCD like me :grinning: just remember to point the resource url with the sub path
+Honeycomb Menu NG is designed to use [custom:button-card](https://github.com/custom-cards/button-card) for its menu buttons.
 
-1. Add the resource to the lovelace config. _There are two ways in doing this_
-    1. `yaml` - find your lovelace.yaml then place the following into resources eg.
-        ```yaml
-            resources:
-              - url: /local/{path-to-module}.js
-                type: module
-        ```
-    1. `Web Interface` - (Home Assistant V0.108+):
-        1. Goto the configuration page then open `Lovelace Dashboards`
-        1. Select the `Resources` tab
-        1. Click on the `+` (add) button in the lower right
-        1. In the url field, add the module js file path ( Where your Home Assistant config/www/ path is needs to be replaced with /local/).  So a path to a saved file in `homeassistant_path/config/wwww/module.js` would be `/local/module.js` as the url path
-        1. Ensure Resource type is left as Javascript Module
+Install `button-card` before using Honeycomb Menu NG.
 
-## How to use
-fire-dom-event action, you can call the honeycomb menu while passing the config options to the property honeycomb_menu.
+## Installation
+
+### HACS — recommended
+
+1. Open **HACS** in Home Assistant.
+2. Open **Custom repositories**.
+3. Add:
+
+   ```text
+   https://github.com/NicolaiTandrup/honeycomb-menu-ng
+   ```
+
+4. Select **Dashboard** as the repository type.
+5. Install **Honeycomb Menu NG**.
+6. Reload the browser after installation or update.
+
+The resource should normally be:
+
+```text
+/hacsfiles/honeycomb-menu-ng/honeycomb-menu-ng.js
+```
+
+with resource type:
+
+```text
+JavaScript module
+```
+
+### Manual installation
+
+Download `honeycomb-menu-ng.js` from the latest release and place it somewhere below `/config/www/`.
+
+For example:
+
+```text
+/config/www/honeycomb-menu-ng/honeycomb-menu-ng.js
+```
+
+Then add the Lovelace resource:
 
 ```yaml
-- type: vertical-stack
-  cards:
-  - type: button
+resources:
+  - url: /local/honeycomb-menu-ng/honeycomb-menu-ng.js
+    type: module
+```
+
+## Quick start
+
+Honeycomb Menu NG is opened using `fire-dom-event`.
+
+```yaml
+type: button
+entity: light.kitchen
+name: Kitchen
+hold_action:
+  action: fire-dom-event
+  honeycomb_menu:
     entity: light.kitchen
+    buttons:
+      - icon: mdi:lightbulb-on-outline
+        tap_action:
+          action: call-service
+          service: light.turn_on
+          service_data:
+            entity_id: light.kitchen
+
+      - icon: mdi:lightbulb-off-outline
+        tap_action:
+          action: call-service
+          service: light.turn_off
+          service_data:
+            entity_id: light.kitchen
+
+      - icon: mdi:information-outline
+        tap_action:
+          action: more-info
+```
+
+The same pattern can be used from `picture-elements`, `custom:button-card`, Mushroom cards, or other Lovelace cards that support `fire-dom-event` actions.
+
+## Layout model
+
+Honeycomb Menu NG has two physical button rings:
+
+- **Slots 1–6**: inner ring
+- **Slots 7–18**: outer ring
+- **Center button**: separate from slot numbering
+
+Approximate slot layout:
+
+```text
+                 9    10    11
+             8      2    3      12
+
+          7      1   CENTER  4      13
+
+            18      6    5      14
+                17   16   15
+```
+
+### Automatic ring selection
+
+Without hard-slot overrides, the active ring layout is selected from the number of resolved buttons:
+
+| Buttons | Active layout |
+|---:|---|
+| 1–6 | Inner ring |
+| 7–12 | Outer ring |
+| 13–18 | Inner + outer ring |
+
+A hard slot can force its physical ring to be active even when the button count would normally select another layout.
+
+## Empty slots
+
+By default, unused positions in active rings remain visible:
+
+```yaml
+empty_slots: visible
+```
+
+To show only configured buttons:
+
+```yaml
+empty_slots: hidden
+```
+
+Only slots belonging to active rings are affected.
+
+## Center button
+
+The center button is enabled automatically unless explicitly disabled.
+
+By default it:
+
+- uses the Honeycomb menu `entity`
+- inherits `active`
+- uses `autoclose: true`
+- opens `more-info` when tapped
+
+### Override the center button
+
+```yaml
+honeycomb_menu:
+  entity: light.kitchen
+  center_button:
+    icon: mdi:lightbulb-group
+    tap_action:
+      action: toggle
+```
+
+### Disable the center button
+
+```yaml
+center_button: false
+```
+
+### Center brightness
+
+When the center button inherits its background from `button_defaults`, Honeycomb Menu NG makes it slightly lighter so the center is visually distinct.
+
+The default is:
+
+```yaml
+center_brightness: 15
+```
+
+This means a 15% lightness boost where the inherited background color can be parsed. If the color cannot be parsed, a brightness filter is used as fallback.
+
+Set it to `0` to disable the automatic contrast:
+
+```yaml
+center_brightness: 0
+```
+
+Or increase it:
+
+```yaml
+center_brightness: 25
+```
+
+If `center_button` defines its own background color, that explicit background wins and the automatic center adjustment is not applied.
+
+## Global button defaults
+
+Use `button_defaults` to apply common configuration to all ring buttons without repeating it on every button.
+
+```yaml
+honeycomb_menu:
+  entity: light.kitchen
+  button_defaults:
+    styles:
+      card:
+        - background: rgba(110, 110, 110, 0.65)
+        - border: 1px solid rgba(255, 255, 255, 0.12)
+  buttons:
+    - icon: mdi:lightbulb-on-outline
+      tap_action:
+        action: toggle
+
+    - icon: mdi:lightbulb-off-outline
+      tap_action:
+        action: call-service
+        service: light.turn_off
+        service_data:
+          entity_id: light.kitchen
+```
+
+A button can override any default locally:
+
+```yaml
+- icon: mdi:lightbulb-group
+  styles:
+    card:
+      - background: rgba(150, 150, 150, 0.70)
+```
+
+## Slot positioning
+
+### Automatic positioning
+
+If no `slot` or legacy `position` is supplied, buttons are assigned to the first free position in the active layout.
+
+```yaml
+buttons:
+  - icon: mdi:lightbulb
+  - icon: mdi:fan
+  - icon: mdi:door
+```
+
+### Soft slots — default
+
+`slot` is a **preference** by default.
+
+```yaml
+- slot: 9
+  icon: mdi:lightbulb
+```
+
+If the requested physical slot belongs to an active ring, the button stays there.
+
+If that ring is not active, the requested slot is mapped to the corresponding position in the active ring. If the preferred position is already occupied, Honeycomb Menu NG moves clockwise to the first free position.
+
+Examples:
+
+- 5 buttons + soft `slot: 7` → inner slot 1
+- 9 buttons + soft `slot: 9` → physical outer slot 9
+- 14 buttons + soft `slot: 9` → physical slot 9
+
+### Hard slots
+
+Use `slot_mode: hard` when the physical position must not move.
+
+```yaml
+- slot: 9
+  slot_mode: hard
+  icon: mdi:lightbulb
+```
+
+Hard slots:
+
+- always use the exact physical slot
+- can force inner and/or outer rings to become active
+- are never moved to resolve a conflict
+
+If two hard buttons request the same physical slot, the first one wins and a warning is written to the browser console.
+
+### Legacy `position`
+
+The original `position` option remains supported for backwards compatibility and behaves as an absolute physical/index position.
+
+```yaml
+- position: 0
+  icon: mdi:lightbulb
+```
+
+For new configurations, prefer `slot` and `slot_mode`.
+
+## Nested Honeycomb menus
+
+A Honeycomb button can open another Honeycomb menu by using `fire-dom-event` in its own action.
+
+```yaml
+buttons:
+  - icon: mdi:menu-right
+    tap_action:
+      action: fire-dom-event
+      honeycomb_menu:
+        entity: light.kitchen
+        buttons:
+          - icon: mdi:lightbulb-on-outline
+            tap_action:
+              action: call-service
+              service: light.turn_on
+              service_data:
+                entity_id: light.kitchen
+
+          - icon: mdi:lightbulb-off-outline
+            tap_action:
+              action: call-service
+              service: light.turn_off
+              service_data:
+                entity_id: light.kitchen
+```
+
+The currently open Honeycomb menu is closed when the nested menu opens.
+
+## Example: picture-elements
+
+```yaml
+type: picture-elements
+image:
+  media_content_id: media-source://image_upload/your-image-id
+  media_content_type: image/png
+
+elements:
+  - type: state-icon
+    entity: light.kitchen
+    style:
+      left: 20%
+      top: 20%
+    tap_action:
+      action: toggle
     hold_action:
       action: fire-dom-event
       honeycomb_menu:
-        template: light
-        autoclose: false
+        entity: light.kitchen
+        autoclose: true
         active: true
-        ...
+        empty_slots: hidden
+        center_brightness: 15
+
+        button_defaults:
+          styles:
+            card:
+              - background: rgba(170, 95, 95, 0.72)
+              - border: 1px solid rgba(255, 255, 255, 0.12)
+
+        center_button:
+          icon: mdi:lightbulb-group
+          tap_action:
+            action: more-info
+
+        buttons:
+          - icon: mdi:lightbulb-on-outline
+            tap_action:
+              action: call-service
+              service: light.turn_on
+              service_data:
+                entity_id: light.kitchen
+
+          - slot: 3
+            icon: mdi:lightbulb-off-outline
+            tap_action:
+              action: call-service
+              service: light.turn_off
+              service_data:
+                entity_id: light.kitchen
+
+          - icon: mdi:dots-horizontal
+            tap_action:
+              action: more-info
 ```
 
-## `honeycomb:` Options
+## Honeycomb menu options
 
-Option          | Values        | Default   | Details
---              | -             |-          |-
-entity | `any:entity_id` | `card:entity` | This will call actions on the entity (entity_id) defined. If omitted then the card entity will be used.
-buttons | `list[0-5]`: [Button](#button-options) `\| skip \| break` | `null \| template_buttons` | The buttons are your honeycombs :grinning:. There are a max of 6 buttons that you can define. _* note: list indexes start at `0`_. Matching indexes with **template_buttons** will be overridden. Using the string `skip` on an index will use the `template_button` for that index and the string `break` will instead disable that honeycomb position regardless of the `template_button` value for that index.
-active | `true \| false \| template` | `false` | Setting this to true will apply active styles based on the entity it's assigned to. You can also choose to use a template and return a boolean value. See [Templating](#templating)
-autoclose | `true \| false` | `true` | Close the menu if a button is pressed
-audio | `any:url_path` | `null` | Point to a audio file that will play when a button has been tapped
-xy_pad | [XYPad](#xypad-options) | `null` | This will allow the adding of a xy pin in the middle of the honeycombs which can execute a service based on the x or y value
-size | `int:px` | `225` | The size in px of the honeycomb menu. Each button item grows with the size
-spacing | `int:px` | `2` | This will assign the padding in px for each honeycomb item
-variables | `object` | `null` | Variables can be accessed through parent templates and templating code via `variables.foo` with `foo` being the variable name. See [Example](#example-using-variables)
-animation_speed | `int:ms` | `100` | Change the speed of the animation to show the menu, each ms is addition to each button... so 50ms * 5 = 250ms total time (first button is immediate)
+| Option | Values | Default | Description |
+|---|---|---|---|
+| `entity` | entity ID | `null` | Primary entity used by the menu and inherited by buttons |
+| `buttons` | list | `[]` | Ring button definitions |
+| `active` | boolean / template | `false` | Enables active styling based on entity state or template result |
+| `autoclose` | boolean | `true` | Default close behaviour after a button action |
+| `audio` | URL/path | `false` | Default audio played when a button is tapped |
+| `xy_pad` | object | `null` | Optional XY control pad |
+| `size` | integer | `225` | Overall Honeycomb size |
+| `spacing` | integer | `2` | Padding between Honeycomb items |
+| `variables` | object | `{}` | Variables available to Honeycomb templates |
+| `animation_speed` | integer (ms) | `100` | Delay increment between button animations |
+| `button_defaults` | object | `{}` | Shared configuration merged into ring buttons |
+| `empty_slots` | `visible` / `hidden` | `visible` | Controls empty positions in active rings |
+| `center_button` | object / `false` | `{}` | Center button override, or `false` to disable it |
+| `center_brightness` | number | `15` | Automatic center-background lightness boost in percent |
 
-## `Button` Options
+## Button options
 
-Option          | Values        | Default   | Details
---              | -             | -         | -
-type | `any:card` | `custom:button-card` | The base card to use for the button **Be sure to set the underlying card to 100% height or it may not display correctly**
-active | `true \| false` | `honeycomb:active` | Override the honeycomb active property for this button item
-show | `true \| false` | `true` | Whether to display this button. If a parent template has an active button for this position then it will show instead. [Templating](#templating) can be used to return a boolean value
-autoclose | `true \| false` | `honeycomb:autoclose` | Override the honeycomb autoclose property for this button
-audio | `any:url_path` | `honeycomb:audio` | Override the honeycomb audio property for this button
-entity | `any:entity_id` | `honeycomb:entity` | You can define the entity that this button targets. Omitted will resort to the honeycombs entity. An entity ca be used in templates by accessing its variable `entity`
-position | `int` | `null` | The position index to place the button. This is helpful for overriding template buttons.
-icon | `any:icon` | `null` | Only adding here for reference to custom:button-card so you can show an icon for the item
-color | `any:css_color` | var(--honeycomb-menu-icon-color) | Color of icon or background (depending on custom:button-card config). Leaving the default value allows the theme to handle the color
-show_name | `true \| false` | `false` | Only relevant for cards that support this option
-Any other options for `Button:type` | - | - | -
+Ring buttons use `custom:button-card` by default, so most button-card options can be passed through.
 
-## `XYPad` Options
+| Option | Values | Default | Description |
+|---|---|---|---|
+| `type` | card type | `custom:button-card` | Underlying Lovelace card used inside the hex |
+| `entity` | entity ID | menu entity | Entity used by the button |
+| `icon` | icon | — | Icon shown by the button |
+| `show` | boolean / template | `true` | Whether the button is available |
+| `active` | boolean / template | menu `active` | Per-button active override |
+| `autoclose` | boolean | menu `autoclose` | Per-button autoclose override |
+| `audio` | URL/path | menu `audio` | Per-button audio override |
+| `slot` | `1–18` | — | Preferred or physical slot depending on slot mode |
+| `slot_mode` | `soft` / `hard` | `soft` | Soft preference or hard physical placement |
+| `position` | integer | — | Legacy absolute/index placement |
+| `tap_action` | action | — | Tap action |
+| `hold_action` | action | — | Hold action |
+| `double_tap_action` | action | — | Double-tap action |
 
-The x and y properties have the same options. If one of the x or y properties are omitted then the pad will only go the direction that's defined.
+Additional options supported by the underlying card can also be supplied.
 
-The pad can be useful for things like light brightness, color hue rotation, opening and closing shutters or roller doors etc.
+## XY Pad
 
-![Example of XYPad](examples/example-xypad.gif)
+The optional XY pad can execute services based on X and/or Y movement.
 
-Option          | Values        | Default   | Details
---              | -             | -         | -
-repeat | `int:ms \| false` | `false` | If the xy pin is moved but idle, then repeat will continue calling the service otherwise the service will only be called when the xy pin is moving
-on_release | `true \| false` | `false` | Only call the service when the xy pin has been released while providing the x y value that it was on
-x | [XYConfig](#xyconfig) | `null` | See below for properties and values. * `null` will disable x movements
-y | [XYConfig](#xyconfig) | `null` | See below for properties and values. * `null` will disable y movements
+Typical uses include:
 
-#### XYConfig
-Option          | Values        | Default   | Details
---              | -             | -         | -
-invert | `true \| false` | `false` | x or y will swap negative and positive values so moving xy pin up will give a positive value whereas down will give a negative value
-service | `any:service` | `null` | The service to call eg. light.turn_on. If this value is omitted then the ball pin will have no effect on this axis
-data or service_data | `dict` | `null` | Provide any service data as a dictionary / object. This property will be processed through the template system allowing access to variables and javascript. See [Templating](#templating).
-
-## Theme Styles and Defaults
-
-Adding the following style properties to your theme `.yaml` file will override the defaults
-```css
-/* Styles selector is used as a placeholder for syntax highlighting */
-styles {
-    --honeycomb-menu-icon-color: var(--paper-item-icon-color);
-    --honeycomb-menu-icon-active-color: var(--paper-item-icon-active-color);
-    --honeycomb-menu-background-color: var(--paper-card-background-color);
-    --honeycomb-menu-active-background-color: var(--paper-card-active-background-color, var(--paper-card-background-color));
-	--honeycomb-menu-disabled: #9a9a9a6e;
-}
-```
-
-## Templating
-All templatable properties will be parsed as [Template Literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), if you need full Javascript functionalities then `HCJS:` (aka HoneyComb JavaScript) must be declared at the start to signal that the string is to be run as javascript (remember to return your values!). Configs with variables defined can be accessed by the `variables` object along with the xypad data if using the feature.
-
-Templating is currently available for all `XYConfig:data` properties and some config options. Templating allows flexibility and provide values based on the xy pads positions or config options.
-
-A property only containing the word **entity** will be converted to the `honeycomb:entity` value.
-
-The xypad will pass the following into the variable object `variables`
-
-        x: Pixels from the x center position
-        y: Pixels from the y center position
-        x_percentage: Percentage of the x position (-10 to 10)
-        y_percentage: Percentage of the y position (-10 to 10)
-
-```javascript
-HCJS: return variables.x_percentage / 10;
-```
-or via Template Literals (does not need to be returned)
-```javascript
-${variables.x_percentage / 10}
-```
-Keep in mind that some service data requires an int and you maybe sending a float, you will need to convert to an int if required.
-
-#### Examples
-
-> Note: the following service `light.relative_brightnesss` is not a part of Home Assistant but instead is my own custom service that changes a lights brightness relatively. You could achieve the same outcome with the `light.turn_on` service and using the javascript template parser with some calculations
+- light brightness
+- hue or color changes
+- blinds and covers
+- relative volume or other service values
 
 ```yaml
-...
-action: fire-dom-event
 honeycomb_menu:
   entity: light.kitchen
-  xy_pad:
-    x:
-      invert: true
-      service: light.relative_color
-      data:
-        # The word entity will become light.kitchen
-        entity_id: entity
-        hue: '${variables.x / 18 * variables.x_percentage}'        
-    y:
-      service: light.relative_brightnesss
-      data:
-        # We can define another entity like normal
-        entity_id: light.bathroom
-        brightness: '${variables.y_percentage}'
-        percentage: true
-```
-
-An example for templatable config options could be used to determine a fan state and set the button as active if fan is currently in that state eg...
-As by default honeycomb menu items uses custom:buton-card for buttons, you can default to their JS syntax or use HCJS:
-```yaml
-...
-action: fire-dom-event
-honeycomb_menu:
-  entity: fan.master_bedroom
-  buttons:
-    - icon: 'mdi:information-variant'
-      tap_action:
-        action: more-info
-    - icon: 'mdi:fan-speed-1'
-      active: '[[[ return entity.attributes.speed == "low" ]]]'
-      tap_action:
-        action: call-service
-        service: fan.set_speed
-        service_data:
-          entity_id: entity
-          speed: low
-    - icon: 'mdi:fan-speed-2'
-      active: '[[[ return entity.attributes.speed == "medium" ]]]'
-      tap_action:
-        action: call-service
-        service: fan.set_speed
-        service_data:
-          entity_id: entity
-          speed: medium
-    - icon: 'mdi:fan-speed-3'
-      active: '[[[ return entity.attributes.speed == "high" ]]]'
-      tap_action:
-        action: call-service
-        service: fan.set_speed
-        service_data:
-          entity_id: entity
-          speed: high
-```
-
-#### Example using variables
-Say you have defined a honeycomb menu template for lights, you can then allow the light template make logical conditions as to how it should render.
-
-edit the honeycomb menu templates file (*don't confuse templating with honeycomb templates)
-```yaml
-light:
-  variables:
-    timer: null
-    motion: null
-  audio: /local/audio/pin-drop.ogg
   xy_pad:
     repeat: 500
     y:
@@ -230,46 +454,164 @@ light:
       service: light.turn_on
       data:
         entity_id: entity
-        brightness_step_pct: 'HCJS: return variables.y_percentage / 10;' # or '${variables.y_percentage / 10}'
+        brightness_step_pct: 'HCJS: return variables.y_percentage / 10;'
+```
+
+### XY Pad options
+
+| Option | Values | Default | Description |
+|---|---|---|---|
+| `repeat` | integer (ms) / `false` | `false` | Repeat service calls while the pad remains active |
+| `on_release` | boolean | `false` | Only call the service when the pad is released |
+| `x` | object | `null` | X-axis configuration |
+| `y` | object | `null` | Y-axis configuration |
+
+### XY axis options
+
+| Option | Values | Default | Description |
+|---|---|---|---|
+| `invert` | boolean | `false` | Reverse positive and negative direction |
+| `service` | service | — | Service to call |
+| `data` / `service_data` | object | — | Service payload; supports Honeycomb templating |
+
+The XY pad exposes:
+
+```text
+variables.x
+variables.y
+variables.x_percentage
+variables.y_percentage
+```
+
+## Templating
+
+Honeycomb Menu keeps the original templating system.
+
+### HCJS
+
+```yaml
+active: 'HCJS: return entity.state === "on";'
+```
+
+### Triple-bracket JavaScript
+
+`custom:button-card` configuration can continue to use button-card JavaScript templates where supported:
+
+```yaml
+name: >
+  [[[
+    return entity.state;
+  ]]]
+```
+
+### Template literal syntax
+
+```yaml
+brightness_step_pct: '${variables.y_percentage}'
+```
+
+The literal word `entity` in Honeycomb service data is replaced with the Honeycomb menu entity.
+
+## Honeycomb templates and variables
+
+Existing Honeycomb templates remain supported and can inherit/override configuration through the original merge hierarchy.
+
+Example:
+
+```yaml
+light:
+  variables:
+    motion: null
   buttons:
-    - icon: 'mdi:information-variant'
+    - icon: mdi:information-variant
       tap_action:
         action: more-info
-    - icon: 'mdi:lightbulb'
-      active: true
-    - show: 'HCJS: return (variables.motion);' # or '${variables.motion}'
-      entity: 'HCJS: return variables.motion;' # or '${variables.motion}'
-      icon: 'mdi:motion-sensor'
-      position: 4
-      active: true
-      tap_action:
-        action: toggle
-    - show: 'HCJS: return (variables.timer);' # or '${variables.timer}'
-      entity: 'HCJS: return variables.timer;' # or '${variables.timer}'
-      icon: 'mdi:timer'
-      position: 5
+
+    - icon: mdi:motion-sensor
+      show: 'HCJS: return variables.motion;'
+      entity: 'HCJS: return variables.motion;'
       active: true
       tap_action:
         action: toggle
 ```
 
-With the example above, if a menu derives the light template then any menu that sets a timer or motion as a variable will show those menu items with the entity being set to the variable property. If the variable is not set then it won't show the menu item and instead will either show the next derived item for that item position or nothing.
+Use it with:
 
-Below is an example on how to assign a menu to the above example.
 ```yaml
-- type: 'custom:button-card'
-  entity: light.back_yard_garden_leds
-  hold_action:
-    action: fire-dom-event
-    honeycomb_menu:
-      template: light
-      variables:
-        motion: automation.motion_back_yard_garden_leds
+hold_action:
+  action: fire-dom-event
+  honeycomb_menu:
+    template: light
+    entity: light.kitchen
+    variables:
+      motion: automation.kitchen_motion
 ```
 
-As shown, this allows us to minimize clutter while keeping things neat and consistent.
+## Theme variables
 
-##### Result
-![Example of variables](examples/example-variables.gif)
+Honeycomb Menu NG retains the original theme variables:
 
-Also note that templates can derive from another template which can also access these variables through the hierarchy
+```css
+--honeycomb-menu-icon-color: var(--paper-item-icon-color);
+--honeycomb-menu-icon-active-color: var(--paper-item-icon-active-color);
+--honeycomb-menu-background-color: var(--paper-card-background-color);
+--honeycomb-menu-active-background-color: var(--paper-card-active-background-color, var(--paper-card-background-color));
+--honeycomb-menu-disabled: #9a9a9a6e;
+```
+
+`button_defaults` is usually the easiest way to apply menu-specific styling directly from YAML.
+
+## Updating
+
+When updating through HACS:
+
+1. Install the new Honeycomb Menu NG version.
+2. Reload the Home Assistant frontend.
+3. If the old JavaScript is still visible, perform a hard browser refresh / clear the frontend cache.
+
+## Backwards compatibility
+
+Honeycomb Menu NG aims to remain compatible with existing Honeycomb Menu configurations.
+
+Notable compatibility behaviour:
+
+- legacy `position` remains supported
+- original Honeycomb templates remain supported
+- XY pad behaviour remains available
+- normal button actions remain compatible
+
+New configurations should generally use `slot` instead of `position`.
+
+## Roadmap
+
+Planned / experimental ideas include:
+
+- improved mouse-hover interaction
+- improved touch-drag interaction
+- additional nested-menu navigation options
+- more reusable menu presets and examples
+
+## Examples and original documentation
+
+The original project contains additional examples and background information:
+
+- [Original Honeycomb Menu](https://github.com/Sian-Lee-SA/honeycomb-menu)
+- [Honeycomb Module: Hex PopUp Menu For Home Assistant](https://smarthomescene.com/guides/honeycomb-module-hex-popup-menu-for-home-assistant/)
+- [button-card](https://github.com/custom-cards/button-card)
+
+Existing media from the original project:
+
+![Example of Honeycomb](examples/example-1.gif)
+![Example of XYPad](examples/example-xypad.gif)
+
+## Credits
+
+Honeycomb Menu NG is based on the original [Honeycomb Menu](https://github.com/Sian-Lee-SA/honeycomb-menu) project by Sian Lee / Sian-Lee-SA.
+
+The original project was designed around [button-card](https://github.com/custom-cards/button-card) by [@RomRider](https://github.com/RomRider).
+
+## Support the original author
+
+<a href="https://www.paypal.com/donate/?business=A82MM255CXF9L&no_recurring=0&item_name=Donating+will+help+justify+my+time+coding+and+doing+projects+that+also+benifits+others.+Any+amount+is+greatly+appreciated%21&currency_code=AUD"><img src="https://github.com/andreostrovsky/donate-with-paypal/raw/master/blue.svg" height="38"></a>
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/SianLee)

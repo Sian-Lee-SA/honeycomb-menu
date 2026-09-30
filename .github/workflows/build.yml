@@ -1,0 +1,63 @@
+name: Build Honeycomb Menu NG
+
+on:
+  push:
+    branches:
+      - master
+      - feature/**
+    paths-ignore:
+      - honeycomb-menu-ng.js
+
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+        run: npm run build
+
+      - name: Verify build output
+        run: test -f honeycomb-menu-ng.js
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: honeycomb-menu-ng
+          path: honeycomb-menu-ng.js
+
+      - name: Commit compiled build
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add honeycomb-menu-ng.js
+
+          if git diff --cached --quiet; then
+            echo "Compiled file is already up to date."
+            exit 0
+          fi
+
+          git commit -m "Update compiled build [skip ci]"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
